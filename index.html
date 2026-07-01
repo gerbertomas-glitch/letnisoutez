@@ -4,12 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Letní Sales Booster 2026</title>
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- React & React DOM (v18) -->
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    <!-- Babel Standalone pro JSX -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.6/babel.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
@@ -52,7 +49,6 @@
 <body class="text-slate-800">
     <div id="root"></div>
 
-    <!-- FIREBASE INITIALIZATION -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
@@ -80,7 +76,6 @@
         window.dispatchEvent(new Event('firebaseReady'));
     </script>
 
-    <!-- REACT / BABEL APP -->
     <script type="text/babel" data-presets="react">
         const { useState, useEffect, useMemo } = React;
 
@@ -90,7 +85,7 @@
             Umbrella: () => <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M12 22V12m0 0a8.003 8.003 0 00-7.935-7H19.93A8.003 8.003 0 0012 12zm0 10a2 2 0 002-2"/></svg>,
             Lock: () => <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2" strokeLinecap="round" strokeLinejoin="round"/><path d="M7 11V7a5 5 0 0110 0v4" strokeLinecap="round" strokeLinejoin="round"/></svg>,
             Unlock: () => <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 019.9-1"/></svg>,
-            TrendingUp: () => <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M2.25 18L9 11.25l4.5 4.5L21.75 7.5M21.75 7.5H16.5m5.25 0v5.25"/></svg>,
+            TrendingUp: () => <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M2.25 18L9 11.25l4.5 4.5L21.75 7.5M21.75 7.5H16.5m5.25 0v5.25" strokeLinecap="round" strokeLinejoin="round"/></svg>,
             Crown: () => <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442a.562.562 0 01.324.988l-4.135 3.847a.562.562 0 00-.176.536l1.24 5.439a.562.562 0 01-.84.61l-4.71-3.238a.562.562 0 00-.616 0L5.34 21.02a.562.562 0 01-.84-.61l1.24-5.439a.562.562 0 00-.176-.536L1.43 11.385a.562.562 0 01.324-.988l5.518-.442a.563.563 0 00.475-.345l2.125-5.11z"/></svg>,
             UserPlus: () => <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M19 7.5H14m0 0v5.25m0-5.25h5.25m-15.75 3h10.5M3 19.5h10.5m-5.25-12a3 3 0 110-6 3 3 0 010 6z"/></svg>,
             Percent: () => <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9 9l6 6m1-6a1 1 0 11-2 0 1 1 0 012 0zm-6 6a1 1 0 11-2 0 1 1 0 012 0z"/></svg>,
@@ -100,7 +95,7 @@
             RotateCcw: () => <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182"/></svg>,
             Check: () => <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>,
             Info: () => <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 111.063.854l-.512 1.96a.75.75 0 001.063.854l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z"/></svg>,
-            Settings: () => <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" strokeLinecap="round" strokeLinejoin="round"/></svg>,
+            Settings: () => <svg className="w-6 h-6 animate-spin-slow" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" strokeLinecap="round" strokeLinejoin="round"/></svg>,
             Activity: () => <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z"/></svg>,
             Target: () => <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>,
             X: () => <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12" strokeLinecap="round" strokeLinejoin="round"/></svg>,
@@ -277,6 +272,7 @@
                     initAuth();
 
                     const unsubAuth = onAuthStateChanged(auth, (usr) => {
+                        user = usr; // Použito při zachování původní logiky, bezpečnější setUser:
                         setUser(usr);
                         if (!usr) setIsLoading(false);
                     });
@@ -335,9 +331,14 @@
 
                 // URČENÍ AKTIVNÍHO TARIFA
                 const getRepTier = (turnover, limits) => {
-                    if (turnover >= limits.zlato) return { tier: 'zlato', rate: 30, label: 'Zlatý tarif 30%', bg: 'bg-yellow-50 text-yellow-700 border-yellow-200/50', ring: 'ring-tier-zlato' };
-                    if (turnover >= limits.stribro) return { tier: 'stribro', rate: 25, label: 'Stříbrný tarif 25%', bg: 'bg-slate-100 text-slate-700 border-slate-200/50', ring: 'ring-tier-stribro' };
-                    if (turnover >= limits.bronz) return { tier: 'bronz', rate: 20, label: 'Bronzový tarif 20%', bg: 'bg-amber-50 text-[#a15c0f] border-amber-200/50', ring: 'ring-tier-bronz' };
+                    const lim = limits || { bronz: 120000, stribro: 200000, zlato: 280000 };
+                    const bronz = lim.bronz || 120000;
+                    const zlato = lim.zlato || 280000;
+                    const stribro = lim.stribro || Math.round((bronz + zlato) / 2);
+
+                    if (turnover >= zlato) return { tier: 'zlato', rate: 30, label: 'Zlatý tarif 30%', bg: 'bg-yellow-50 text-yellow-700 border-yellow-200/50', ring: 'ring-tier-zlato' };
+                    if (turnover >= stribro) return { tier: 'stribro', rate: 25, label: 'Stříbrný tarif 25%', bg: 'bg-slate-100 text-slate-700 border-slate-200/50', ring: 'ring-tier-stribro' };
+                    if (turnover >= bronz) return { tier: 'bronz', rate: 20, label: 'Bronzový tarif 20%', bg: 'bg-amber-50 text-[#a15c0f] border-amber-200/50', ring: 'ring-tier-bronz' };
                     return { tier: 'none', rate: 20, label: 'Základní tarif 20%', bg: 'bg-slate-50 text-slate-500 border-slate-200/30', ring: 'ring-tier-none' };
                 };
 
@@ -399,17 +400,17 @@
                 }, [salesReps, activeMonth]);
 
                 // ZOBRAZENÍ DETAILU VYBRANÉHO OBCHODNÍKA
-                const activeMerchant = salesReps.find(m => m.id === selectedRepId) || salesReps[0];
+                const activeMerchant = salesReps.find(m => m.id === selectedRepId) || salesReps[0] || INITIAL_TEAM[0];
 
                 // PŘÍPRAVA DYNAMICKÝCH DAT PRO DETAILNÍ ROADMAPA MILNÍKŮ
                 const roadmapDetails = useMemo(() => {
                     if (!activeMerchant) return null;
-                    const data = activeMerchant[activeMonth];
+                    const data = activeMerchant[activeMonth] || { turnover: 0, newClients: 0, limits: { bronz: 120000, stribro: 200000, zlato: 280000 } };
                     const realTurnover = data.turnover;
                     // Simulovaný obrat má přednost, pokud existuje override
                     const currentTurnover = simulatedTurnovers[activeMerchant.id] !== undefined ? simulatedTurnovers[activeMerchant.id] : realTurnover;
                     
-                    const limits = data.limits;
+                    const limits = data.limits || { bronz: 120000, stribro: 200000, zlato: 280000 };
                     const tierInfo = getRepTier(currentTurnover, limits);
 
                     // 1. Bronz Milník
@@ -419,26 +420,27 @@
                     const bronzMissing = limits.bronz - currentTurnover;
 
                     // 2. Stříbro Milník
-                    const isStribroCompleted = currentTurnover >= limits.stribro;
-                    const isStribroActive = currentTurnover >= limits.bronz && currentTurnover < limits.stribro;
+                    const stribroLimit = limits.stribro || Math.round((limits.bronz + limits.zlato) / 2);
+                    const isStribroCompleted = currentTurnover >= stribroLimit;
+                    const isStribroActive = currentTurnover >= limits.bronz && currentTurnover < stribroLimit;
                     let stribroProgress = 0;
                     if (isStribroCompleted) stribroProgress = 100;
-                    else if (isStribroActive) stribroProgress = ((currentTurnover - limits.bronz) / (limits.stribro - limits.bronz)) * 100;
-                    const stribroMissing = limits.stribro - currentTurnover;
+                    else if (isStribroActive) stribroProgress = ((currentTurnover - limits.bronz) / (stribroLimit - limits.bronz)) * 100;
+                    const stribroMissing = stribroLimit - currentTurnover;
 
                     // 3. Zlato Milník
                     const isZlatoCompleted = currentTurnover >= limits.zlato;
-                    const isZlatoActive = currentTurnover >= limits.stribro && currentTurnover < limits.zlato;
+                    const isZlatoActive = currentTurnover >= stribroLimit && currentTurnover < limits.zlato;
                     let zlatoProgress = 0;
                     if (isZlatoCompleted) zlatoProgress = 100;
-                    else if (isZlatoActive) zlatoProgress = ((currentTurnover - limits.stribro) / (limits.zlato - limits.stribro)) * 100;
+                    else if (isZlatoActive) zlatoProgress = ((currentTurnover - stribroLimit) / (limits.zlato - stribroLimit)) * 100;
                     const zlatoMissing = limits.zlato - currentTurnover;
 
                     return {
                         turnover: currentTurnover,
                         isSimulating: simulatedTurnovers[activeMerchant.id] !== undefined,
                         tierInfo,
-                        limits,
+                        limits: { ...limits, stribro: stribroLimit },
                         bronz: { completed: isBronzCompleted, active: isBronzActive, progress: bronzProgress, missing: bronzMissing },
                         stribro: { completed: isStribroCompleted, active: isStribroActive, progress: stribroProgress, missing: stribroMissing },
                         zlato: { completed: isZlatoCompleted, active: isZlatoActive, progress: zlatoProgress, missing: zlatoMissing }
@@ -452,7 +454,7 @@
                         setAdminActiveRepId(targetId);
                         const rep = salesReps.find(x => x.id === targetId);
                         if (rep) {
-                            const data = rep[activeMonth];
+                            const data = rep[activeMonth] || { turnover: 0, newClients: 0, limits: { bronz: 120000, zlato: 280000 } };
                             setAdminRepObrat(data.turnover);
                             setAdminRepClients(data.newClients);
                             setAdminRepBronz(data.limits.bronz);
@@ -591,7 +593,7 @@
 
                 const executeDeleteMerchant = async () => {
                     if (!repToDeleteId) return;
-                    const m = salesReps.find(x => x.id === repToDeleteId);
+                    const m = salesReps.find(x => x.id !== repToDeleteId); // Zde opraven fallback
                     const updatedReps = salesReps.filter(x => x.id !== repToDeleteId);
                     let fallbackId = updatedReps[0].id;
                     setSalesReps(updatedReps);
@@ -604,7 +606,7 @@
                 };
 
                 // ADMIN - ZMĚNA MĚNY S PŘEPOČTEM VÝCHOZÍCH LIMITŮ
-                const handleAdminCurrencyChange = (curr) => {
+                const changeAdminMerchantCurrency = (curr) => {
                     setAdminRepCurrency(curr);
                     if (curr === 'EUR') {
                         setAdminRepBronz(5000);
@@ -718,12 +720,12 @@
                                 
                                 <div className="flex items-center gap-3">
                                     <div className="bg-slate-100 p-1.5 rounded-2xl flex gap-1 border border-slate-200/50">
-                                        <button onClick={() => switchMonth('july')} className={`px-5 py-2 rounded-xl text-xs font-extrabold transition-all duration-300 flex items-center gap-1.5 ${
+                                        <button onClick={() => setActiveMonth('july')} className={`px-5 py-2 rounded-xl text-xs font-extrabold transition-all duration-300 flex items-center gap-1.5 ${
                                             activeMonth === 'july' ? 'bg-white text-orange-600 shadow-sm' : 'text-slate-500 hover:text-slate-900'
                                         }`}>
                                             <Icons.SunMenu /> Červenec
                                         </button>
-                                        <button onClick={() => switchMonth('august')} className={`px-5 py-2 rounded-xl text-xs font-extrabold transition-all duration-300 flex items-center gap-1.5 ${
+                                        <button onClick={() => setActiveMonth('august')} className={`px-5 py-2 rounded-xl text-xs font-extrabold transition-all duration-300 flex items-center gap-1.5 ${
                                             activeMonth === 'august' ? 'bg-white text-orange-600 shadow-sm' : 'text-slate-500 hover:text-slate-900'
                                         }`}>
                                             <Icons.UmbrellaMenu /> Srpen
@@ -872,7 +874,7 @@
                                                         <div>
                                                             <h4 className="font-extrabold text-xs text-slate-900 flex items-center gap-1">
                                                                 <span>{merchant.name}</span>
-                                                                <span className="text-[9px] px-1 bg-white rounded border uppercase font-black">{merchant.currency}</span>
+                                                                <span className="text-[9px] px-1 bg-white rounded text-slate-500 uppercase font-black">{merchant.currency}</span>
                                                             </h4>
                                                             <span className="text-[9px] font-bold text-slate-400">Akvizice: {data.newClients} nově</span>
                                                         </div>
@@ -1118,7 +1120,7 @@
                             </div>
                         </div>
 
-                        {/* SEZNAM TÝDENNÍCH VÍTĚZŮ */}
+                        {/* WORKSPACE - LIST AND DETAIL */}
                         <div className="max-w-7xl mx-auto px-4 sm:px-8 mt-8">
                             <section className="bg-white border border-slate-100 rounded-3xl p-6 md:p-8 premium-shadow">
                                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6 pb-5 border-b border-slate-100">
@@ -1237,7 +1239,7 @@
                                     <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50">
                                         <div>
                                             <h2 className="text-lg font-extrabold text-slate-900 flex items-center gap-2">
-                                                <Icons.Icons.Settings /> Rychlá administrace
+                                                <Icons.Settings /> Rychlá administrace
                                             </h2>
                                             <p className="text-xs text-slate-500">
                                                 Upravujete výsledky pro měsíc: <strong className="text-orange-600 uppercase">{activeMonth === 'july' ? 'Červenec' : 'Srpen'}</strong>
@@ -1270,10 +1272,10 @@
                                                 <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Nastavení měny</label>
                                                 <div className="flex gap-2">
                                                     <label className="flex-1 p-2 bg-slate-50 border border-slate-200 rounded-xl flex items-center justify-center gap-1.5 cursor-pointer text-xs font-bold">
-                                                        <input type="radio" name="admin-opt-currency" value="CZK" id="admin-currency-czk" checked={adminRepCurrency === 'CZK'} onChange={() => handleAdminCurrencyChange('CZK')} className="accent-orange-500" /> Kč (CZK)
+                                                        <input type="radio" name="admin-opt-currency" value="CZK" id="admin-currency-czk" checked={adminRepCurrency === 'CZK'} onChange={() => changeAdminMerchantCurrency('CZK')} className="accent-orange-500" /> Kč (CZK)
                                                     </label>
                                                     <label className="flex-1 p-2 bg-slate-50 border border-slate-200 rounded-xl flex items-center justify-center gap-1.5 cursor-pointer text-xs font-bold">
-                                                        <input type="radio" name="admin-opt-currency" value="EUR" id="admin-currency-eur" checked={adminRepCurrency === 'EUR'} onChange={() => handleAdminCurrencyChange('EUR')} className="accent-orange-500" /> € (EUR)
+                                                        <input type="radio" name="admin-opt-currency" value="EUR" id="admin-currency-eur" checked={adminRepCurrency === 'EUR'} onChange={() => changeAdminMerchantCurrency('EUR')} className="accent-orange-500" /> € (EUR)
                                                     </label>
                                                 </div>
                                             </div>
@@ -1281,7 +1283,7 @@
                                             {/* Výsledky vybraného obchodníka */}
                                             <div className="space-y-4 pt-2">
                                                 <div className="space-y-1.5">
-                                                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block" id="admin-label-turnover">Aktuální obrat (Kč)</label>
+                                                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block" id="admin-label-turnover">Aktuální obrat</label>
                                                     <div className="flex gap-2">
                                                         <input type="number" value={adminRepObrat} onChange={(e) => setAdminRepObrat(e.target.value)} className="flex-1 p-2.5 border border-slate-200 rounded-xl text-sm font-black focus:ring-2 focus:ring-orange-500/20" />
                                                         <div id="admin-quick-turnover-buttons" className="flex gap-2">
@@ -1340,7 +1342,7 @@
                                             </div>
 
                                             <div className="pt-4 border-t border-slate-100 flex justify-between">
-                                                <button onClick={openAddMerchantModal} className="text-xs font-extrabold text-orange-600 bg-orange-50 hover:bg-orange-100 px-3 py-2 rounded-xl transition-all flex items-center gap-1">
+                                                <button onClick={() => setShowAddMerchantModal(true)} className="text-xs font-extrabold text-orange-600 bg-orange-50 hover:bg-orange-100 px-3 py-2 rounded-xl transition-all flex items-center gap-1">
                                                     <Icons.Plus /> Nový člověk
                                                 </button>
                                                 <button onClick={deleteSelectedMerchant} className="text-xs font-extrabold text-red-500 bg-red-50 hover:bg-red-100 px-3 py-2 rounded-xl transition-all flex items-center gap-1">
@@ -1487,7 +1489,9 @@
                                     </div>
                                     <div>
                                         <h3 className="text-base font-extrabold text-slate-900">Opravdu smazat?</h3>
-                                        <p className="text-slate-500 text-xs mt-1.5 leading-relaxed">Tato akce trvale odstraní obchodníka z obou měsíců a vymaže veškeré jeho výsledky.</p>
+                                        <p className="text-slate-500 text-xs mt-1.5 leading-relaxed">
+                                            Tato akce trvale odstraní obchodníka <strong>{salesReps.find(x => x.id === repToDeleteId)?.name}</strong> z obou měsíců a vymaže veškeré jeho výsledky.
+                                        </p>
                                     </div>
                                     <div className="flex gap-2 pt-2">
                                         <button onClick={() => setRepToDeleteId(null)} className="w-1/2 p-3 border border-slate-200 text-slate-500 rounded-2xl text-xs font-bold hover:bg-slate-50 transition-all">Zpět</button>
