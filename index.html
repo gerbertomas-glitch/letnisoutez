@@ -1,0 +1,1775 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Letní Sales Booster 2026</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+        
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: #f8fafc;
+            color: #0f172a;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Výrazné vizuální stíny a detaily karet */
+        .premium-shadow {
+            box-shadow: 0 10px 30px -10px rgba(148, 163, 184, 0.12), 0 1px 3px rgba(148, 163, 184, 0.05);
+        }
+
+        .premium-shadow-hover:hover {
+            box-shadow: 0 20px 40px -15px rgba(249, 115, 22, 0.15), 0 1px 5px rgba(249, 115, 22, 0.05);
+        }
+
+        /* Efekty pro tarify */
+        .ring-tier-none { border: 3px solid #cbd5e1; }
+        .ring-tier-bronz { border: 3px solid #d97706; box-shadow: 0 0 12px rgba(217, 119, 6, 0.2); }
+        .ring-tier-stribro { border: 3px solid #64748b; box-shadow: 0 0 12px rgba(100, 116, 139, 0.2); }
+        .ring-tier-zlato { border: 3px solid #eab308; box-shadow: 0 0 16px rgba(234, 179, 8, 0.35); }
+
+        /* Custom range slider styling */
+        input[type="range"] {
+            -webkit-appearance: none;
+            appearance: none;
+            background: #e2e8f0;
+            border-radius: 9999px;
+            height: 8px;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #f97316;
+            cursor: pointer;
+            border: 2px solid #ffffff;
+            box-shadow: 0 4px 10px rgba(249, 115, 22, 0.3);
+            transition: transform 0.1s ease;
+        }
+
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.15);
+        }
+
+        /* Skrytí scrollbaru */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="min-h-screen pb-20">
+
+    <!-- TOAST NOTIFIKACE -->
+    <div id="toast-container" class="fixed top-6 right-6 z-50 space-y-3 pointer-events-none"></div>
+
+    <!-- HEADER / HERO SEKCE -->
+    <header class="bg-white border-b border-slate-100 py-6 px-6 mb-8 relative overflow-hidden">
+        <div class="absolute right-0 top-0 w-96 h-96 bg-gradient-to-bl from-orange-100/40 via-yellow-100/10 to-transparent rounded-full blur-3xl pointer-events-none"></div>
+        <div class="absolute left-10 -bottom-20 w-72 h-72 bg-emerald-100/20 rounded-full blur-3xl pointer-events-none"></div>
+
+        <div class="max-w-7xl mx-auto flex flex-col lg:flex-row justify-between items-center gap-6 relative z-10">
+            <div class="text-center lg:text-left">
+                <div class="flex items-center gap-2 mb-2 justify-center lg:justify-start">
+                    <span class="bg-orange-50 text-orange-600 text-[10px] font-extrabold px-2.5 py-1 rounded-full uppercase tracking-wider border border-orange-100">
+                        Letní Výzva 2026
+                    </span>
+                    <span class="text-slate-400 text-xs font-semibold">1. 7. – 31. 8. 2026</span>
+                </div>
+                <h1 class="text-3xl md:text-5xl font-black tracking-tight text-slate-900">
+                    ☀️ Letní Sales <span class="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-amber-500">Booster</span>
+                </h1>
+                <p class="text-slate-500 mt-1.5 text-sm md:text-base max-w-xl">
+                    Sledujte své individuální cíle v reálném čase, získejte až <strong class="text-orange-500 font-bold">30% provize</strong> a vybojujte týdenní prémie.
+                </p>
+            </div>
+            
+            <!-- Hlavní ovládání a přepínač měsíců -->
+            <div class="flex flex-col sm:flex-row items-center gap-3">
+                <!-- Výběr měsíce -->
+                <div class="bg-slate-100 p-1.5 rounded-2xl flex gap-1 border border-slate-200/50">
+                    <button id="btn-july" onclick="switchMonth('july')" class="px-5 py-2 rounded-xl text-xs font-extrabold transition-all duration-300 flex items-center gap-1.5 bg-white text-orange-600 shadow-sm">
+                        <i data-lucide="sun" class="w-3.5 h-3.5"></i> Červenec
+                    </button>
+                    <button id="btn-august" onclick="switchMonth('august')" class="px-5 py-2 rounded-xl text-xs font-extrabold transition-all duration-300 flex items-center gap-1.5 text-slate-500 hover:text-slate-900">
+                        <i data-lucide="umbrella" class="w-3.5 h-3.5"></i> Srpen
+                    </button>
+                </div>
+
+                <!-- Admin tlačítko -->
+                <button id="admin-auth-btn" onclick="toggleAdminAuthModal()" class="bg-slate-900 hover:bg-slate-800 text-white px-5 py-2.5 rounded-2xl text-xs font-bold flex items-center gap-2 transition-all duration-300 shadow-sm">
+                    <i data-lucide="lock" id="admin-lock-icon" class="w-3.5 h-3.5 text-orange-400"></i>
+                    <span id="admin-btn-text">Vstup pro Admina</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 md:px-6 space-y-8">
+
+        <!-- STAV ADMINISTRACE (Zobrazeno pouze při přihlášení) -->
+        <section id="admin-active-bar" class="hidden bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-3xl p-5 flex flex-col sm:flex-row justify-between items-center gap-4 shadow-lg">
+            <div class="flex items-center gap-3 text-center sm:text-left">
+                <div class="p-2.5 bg-white/20 rounded-xl">
+                    <i data-lucide="settings" class="w-6 h-6 animate-spin-slow"></i>
+                </div>
+                <div>
+                    <h3 class="font-extrabold text-base">Administrátorský režim je aktivní</h3>
+                    <p class="text-xs text-orange-50/80">Aktualizujte výsledky přímo na této stránce v zjednodušeném panelu.</p>
+                </div>
+            </div>
+            <div class="flex gap-2 w-full sm:w-auto">
+                <button onclick="openAdminPanel()" class="flex-1 sm:flex-initial bg-white text-orange-600 hover:bg-orange-50 px-5 py-2.5 rounded-xl text-xs font-extrabold shadow-sm transition-all duration-300">
+                    ✍️ Rychle upravit data / lidi
+                </button>
+                <button onclick="logoutAdmin()" class="bg-slate-950/20 hover:bg-slate-950/30 text-white px-4 py-2.5 rounded-xl text-xs font-extrabold transition-all">
+                    Odhlásit
+                </button>
+            </div>
+        </section>
+
+        <!-- RYCHLÉ UKAZATELE (KPI DASHBOARD) -->
+        <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            <!-- Celkový obrat -->
+            <div class="bg-white border border-slate-100 p-5 rounded-3xl flex items-center gap-4 premium-shadow">
+                <div class="p-3 bg-orange-50 rounded-2xl text-orange-500">
+                    <i data-lucide="trending-up" class="w-6 h-6"></i>
+                </div>
+                <div>
+                    <span class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider block">Celkový obrat týmu</span>
+                    <h3 id="stat-total-turnover" class="text-xl font-extrabold text-slate-900 mt-0.5">0 Kč</h3>
+                    <span id="stat-total-turnover-secondary" class="text-[10px] text-slate-400 block mt-0.5">--</span>
+                </div>
+            </div>
+
+            <!-- Top lídr -->
+            <div class="bg-white border border-slate-100 p-5 rounded-3xl flex items-center gap-4 premium-shadow">
+                <div class="p-3 bg-amber-50 rounded-2xl text-amber-500">
+                    <i data-lucide="crown" class="w-6 h-6"></i>
+                </div>
+                <div>
+                    <span class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider block">Aktuální lídr provizí</span>
+                    <h3 id="stat-top-commission" class="text-xl font-extrabold text-slate-900 mt-0.5">--</h3>
+                    <span id="stat-top-commission-value" class="text-[10px] text-slate-500 font-medium block mt-0.5">--</span>
+                </div>
+            </div>
+
+            <!-- Nejvíce akvizic -->
+            <div class="bg-white border border-slate-100 p-5 rounded-3xl flex items-center gap-4 premium-shadow">
+                <div class="p-3 bg-emerald-50 rounded-2xl text-emerald-500">
+                    <i data-lucide="user-plus" class="w-6 h-6"></i>
+                </div>
+                <div>
+                    <span class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider block">Nejaktivnější lovec</span>
+                    <h3 id="stat-top-hunter" class="text-xl font-extrabold text-slate-900 mt-0.5">--</h3>
+                    <span id="stat-top-hunter-value" class="text-[10px] text-slate-500 font-medium block mt-0.5">--</span>
+                </div>
+            </div>
+
+            <!-- Průměrná provize -->
+            <div class="bg-white border border-slate-100 p-5 rounded-3xl flex items-center gap-4 premium-shadow">
+                <div class="p-3 bg-purple-50 rounded-2xl text-purple-500">
+                    <i data-lucide="percent" class="w-6 h-6"></i>
+                </div>
+                <div>
+                    <span class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider block">Průměrná provize týmu</span>
+                    <h3 id="stat-avg-commission" class="text-xl font-extrabold text-slate-900 mt-0.5">0 %</h3>
+                    <span class="text-[10px] text-purple-500 font-semibold block mt-0.5">Každý má min. 20% základ</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- SEKCE LÍDRŮ (STUPNÊ VÍTĚZŮ) -->
+        <section class="bg-white border border-slate-100 rounded-3xl p-6 relative overflow-hidden premium-shadow">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-lg font-extrabold text-slate-900 flex items-center gap-2">
+                    <i data-lucide="medal" class="text-amber-500"></i> Top 3 Obchodníci tohoto měsíce
+                </h2>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-end pt-4" id="podium-container">
+                <!-- Generováno pomocí JS -->
+            </div>
+        </section>
+
+        <!-- HLAVNÍ DIAGRAM: SEZNAM TÝMU & INDIVIDUÁLNÍ TEPLOMĚR -->
+        <section class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            
+            <!-- LEVÝ PANEL: SEZNAM OBCHODNÍKŮ (5 sloupců) -->
+            <div class="lg:col-span-5 bg-white border border-slate-100 rounded-3xl p-6 flex flex-col justify-between premium-shadow">
+                <div class="space-y-4">
+                    <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+                        <div>
+                            <h2 class="text-base font-extrabold text-slate-900">Náš prodejní tým</h2>
+                            <p class="text-slate-400 text-xs mt-0.5">Výběrem zobrazíte detailní teploměr.</p>
+                        </div>
+                        <span id="team-count" class="bg-slate-100 text-slate-600 text-xs font-bold px-2.5 py-1 rounded-full">0 lidí</span>
+                    </div>
+
+                    <!-- Seznam lidí v přehledném listu -->
+                    <div id="members-list" class="space-y-3 max-h-[460px] overflow-y-auto pr-1 no-scrollbar">
+                        <!-- Generováno pomocí JS -->
+                    </div>
+                </div>
+
+                <!-- Legenda provizních pásem -->
+                <div class="mt-6 pt-5 border-t border-slate-100">
+                    <span class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider block mb-3">Legenda provizních pásem</span>
+                    <div class="grid grid-cols-2 gap-2 text-xs font-semibold text-slate-600">
+                        <div class="flex items-center gap-2">
+                            <span class="w-3 h-3 rounded-full bg-slate-300"></span>
+                            <span>Základní tarif (20 %)</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="w-3 h-3 rounded-full bg-[#d97706]"></span>
+                            <span>Bronz (20 %)</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="w-3 h-3 rounded-full bg-[#64748b]"></span>
+                            <span>Stříbro (25 %)</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="w-3 h-3 rounded-full bg-[#eab308]"></span>
+                            <span>Zlato (30 %)</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PRAVÝ PANEL: DETAIL VYBRANÉHO ČLENA & PROGRES (7 sloupců) -->
+            <div id="merchant-detail-card" class="lg:col-span-7 bg-white border border-slate-100 rounded-3xl p-6 md:p-8 space-y-6 premium-shadow relative transition-all duration-300">
+                <!-- Vykreslí se automaticky pomocí JS -->
+            </div>
+
+        </section>
+
+        <!-- SÍŇ SLÁVY (TÝDENNÍ VÝZVY) -->
+        <section class="bg-white border border-slate-100 rounded-3xl p-6 md:p-8 premium-shadow">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6 pb-5 border-b border-slate-100">
+                <div>
+                    <h2 class="text-lg font-extrabold text-slate-900 flex items-center gap-2">
+                        <i data-lucide="trophy" class="text-yellow-500"></i> Síň slávy: Týdenní Lovci Akvizic
+                    </h2>
+                    <p class="text-slate-400 text-xs mt-0.5">Každý týden získá nejlepší obchodník s nejvíce novými klienty bonus <strong>1 000 Kč / 40 €</strong>.</p>
+                </div>
+                <span class="bg-orange-50 text-orange-700 text-xs font-extrabold px-4 py-2 rounded-2xl border border-orange-100 flex items-center gap-1.5">
+                    <i data-lucide="gift" class="w-4 h-4"></i> Týdenní prémie: 1 000 Kč / 40 €
+                </span>
+            </div>
+
+            <!-- Grid týdnů -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4" id="weekly-winners-grid">
+                <!-- Generováno pomocí JS -->
+            </div>
+        </section>
+
+    </main>
+
+    <!-- ========================================== -->
+    <!--     NOVÝ EXTRÉMNÊ JEDNODUCHÝ ADMIN MODAL   -->
+    <!-- ========================================== -->
+    <div id="admin-panel-modal" class="hidden fixed inset-0 z-40 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-4xl w-full max-h-[95vh] overflow-hidden border border-slate-100 shadow-2xl flex flex-col">
+            
+            <!-- Hlavička modálu -->
+            <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+                <div>
+                    <h2 class="text-lg font-extrabold text-slate-900 flex items-center gap-2">
+                        <i data-lucide="settings" class="text-orange-500"></i> Rychlá administrace
+                    </h2>
+                    <p class="text-xs text-slate-500">
+                        Upravujete výsledky pro měsíc: <strong class="text-orange-600 uppercase" id="admin-current-month-label">Červenec</strong>
+                    </p>
+                </div>
+                <button onclick="closeAdminPanel()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 p-2 rounded-xl transition-all">
+                    <i data-lucide="x" class="w-4 h-4"></i>
+                </button>
+            </div>
+
+            <!-- TĚLO ADMINISTRACE (Dvousloupcové, jednoduché) -->
+            <div class="p-6 overflow-y-auto flex-1 grid grid-cols-1 md:grid-cols-2 gap-6">
+                
+                <!-- LEVÝ SLOUPEC: RYCHLÁ ÚPRAVA OBCHODNÍKA -->
+                <div class="space-y-4 border-r border-slate-100 pr-0 md:pr-6">
+                    <div class="flex items-center gap-2 border-b border-slate-100 pb-2">
+                        <span class="w-5 h-5 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center text-xs font-bold">1</span>
+                        <h3 class="text-sm font-extrabold text-slate-800">Uložit výsledky obchodníka</h3>
+                    </div>
+
+                    <!-- Dropdown pro výběr obchodníka -->
+                    <div class="space-y-1">
+                        <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Vyberte člena týmu</label>
+                        <select id="admin-merchant-select" onchange="loadAdminMerchantData(this.value)" class="w-full p-2.5 border border-slate-200 rounded-xl text-sm font-bold bg-slate-50 focus:ring-2 focus:ring-orange-500/20">
+                            <!-- Plněno dynamicky -->
+                        </select>
+                    </div>
+
+                    <!-- Volba měny aktivního obchodníka -->
+                    <div class="space-y-1">
+                        <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Nastavení měny</label>
+                        <div class="flex gap-2">
+                            <label class="flex-1 p-2 bg-slate-50 border border-slate-200 rounded-xl flex items-center justify-center gap-1.5 cursor-pointer text-xs font-bold">
+                                <input type="radio" name="admin-opt-currency" value="CZK" id="admin-currency-czk" onchange="changeAdminMerchantCurrency('CZK')" class="accent-orange-500"> Kč (CZK)
+                            </label>
+                            <label class="flex-1 p-2 bg-slate-50 border border-slate-200 rounded-xl flex items-center justify-center gap-1.5 cursor-pointer text-xs font-bold">
+                                <input type="radio" name="admin-opt-currency" value="EUR" id="admin-currency-eur" onchange="changeAdminMerchantCurrency('EUR')" class="accent-orange-500"> € (EUR)
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Výsledky vybraného obchodníka -->
+                    <div class="space-y-4 pt-2">
+                        <!-- Obrat -->
+                        <div class="space-y-1.5">
+                            <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block" id="admin-label-turnover">Aktuální obrat (Kč)</label>
+                            <div class="flex gap-2">
+                                <input type="number" id="admin-opt-turnover" class="flex-1 p-2.5 border border-slate-200 rounded-xl text-sm font-black focus:ring-2 focus:ring-orange-500/20">
+                                <div id="admin-quick-turnover-buttons" class="flex gap-2">
+                                    <!-- Generováno dynamicky podle vybrané měny -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Noví klienti -->
+                        <div class="space-y-1.5">
+                            <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Počet nových klientů (ks)</label>
+                            <div class="flex items-center gap-2">
+                                <button onclick="adjustAdminClients(-1)" class="bg-slate-100 hover:bg-slate-200 text-slate-800 font-black w-10 h-10 rounded-xl transition-all">-</button>
+                                <input type="number" id="admin-opt-clients" class="flex-1 p-2.5 border border-slate-200 rounded-xl text-sm font-black text-center focus:ring-2 focus:ring-orange-500/20">
+                                <button onclick="adjustAdminClients(1)" class="bg-slate-100 hover:bg-slate-200 text-slate-800 font-black w-10 h-10 rounded-xl transition-all">+</button>
+                            </div>
+                        </div>
+
+                        <!-- Skryté / Collapsed nastavení individuálních cílů (IP limitů) -->
+                        <div class="pt-2 border-t border-slate-100">
+                            <button type="button" onclick="toggleAdvancedLimits()" class="text-xs text-slate-500 hover:text-slate-800 font-bold flex items-center gap-1">
+                                <i data-lucide="chevron-down" id="adv-limits-icon" class="w-3.5 h-3.5 transition-transform"></i> 
+                                Chci změnit nastavené limity (IP cíle)
+                            </button>
+                            
+                            <div id="advanced-limits-section" class="hidden mt-3 p-4 bg-slate-50 rounded-2xl border border-slate-100 space-y-3">
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div class="space-y-1">
+                                        <label class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block" id="admin-label-bronz">Limit Bronz</label>
+                                        <input type="number" id="admin-opt-limit-bronz" class="w-full p-2 border border-slate-200 rounded-lg text-xs font-semibold bg-white">
+                                    </div>
+                                    <div class="space-y-1">
+                                        <label class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block" id="admin-label-zlato">Limit Zlato</label>
+                                        <input type="number" id="admin-opt-limit-zlato" class="w-full p-2 border border-slate-200 rounded-lg text-xs font-semibold bg-white">
+                                    </div>
+                                </div>
+                                <p class="text-[9px] text-slate-400 leading-normal">Stříbrný limit se vypočítá automaticky jako střed mezi Bronzem a Zlatem.</p>
+                            </div>
+                        </div>
+
+                        <!-- Ukládací tlačítko obchodníka -->
+                        <div class="pt-2">
+                            <button onclick="saveAdminMerchantData()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold p-3 rounded-2xl text-xs shadow-md shadow-emerald-500/10 transition-all flex items-center justify-center gap-1.5">
+                                <i data-lucide="check" class="w-4 h-4"></i> Uložit výsledky obchodníka
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Sekundární funkce (Přidat / Odebrat) -->
+                    <div class="pt-4 border-t border-slate-100 flex justify-between">
+                        <button onclick="openAddMerchantModal()" class="text-xs font-extrabold text-orange-600 bg-orange-50 hover:bg-orange-100 px-3 py-2 rounded-xl transition-all flex items-center gap-1">
+                            <i data-lucide="user-plus" class="w-3.5 h-3.5"></i> Nový člověk
+                        </button>
+                        <button onclick="deleteSelectedMerchant()" class="text-xs font-extrabold text-red-500 bg-red-50 hover:bg-red-100 px-3 py-2 rounded-xl transition-all flex items-center gap-1">
+                            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i> Smazat obchodníka
+                        </button>
+                    </div>
+                </div>
+
+                <!-- PRAVÝ SLOUPEC: SOUŤEŽ TÝDNŮ -->
+                <div class="space-y-4">
+                    <div class="flex items-center gap-2 border-b border-slate-100 pb-2">
+                        <span class="w-5 h-5 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center text-xs font-bold">2</span>
+                        <h3 class="text-sm font-extrabold text-slate-800">Vyhodnotit týdenní soutěž</h3>
+                    </div>
+
+                    <!-- Dropdown pro výběr týdne -->
+                    <div class="space-y-1">
+                        <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Vyberte týden</label>
+                        <select id="admin-week-select" onchange="renderAdminWeeksPart()" class="w-full p-2.5 border border-slate-200 rounded-xl text-sm bg-white font-bold text-slate-800">
+                            <!-- Generováno JS -->
+                        </select>
+                    </div>
+
+                    <!-- Detail týdne pro nastavení výsledku -->
+                    <div id="admin-week-detail-container" class="space-y-4 pt-2">
+                        <!-- Plněno dynamicky -->
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!--       FORMULÁŘ: PŘIDÁNÍ OBCHODNÍKA         -->
+    <!-- ========================================== -->
+    <div id="add-merchant-modal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl p-6 max-w-xl w-full border border-slate-100 shadow-2xl space-y-6">
+            <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+                <h3 class="text-base font-extrabold text-slate-900 flex items-center gap-2">
+                    <i data-lucide="user-plus" class="text-orange-500"></i> Nový obchodník do soutěže
+                </h3>
+                <button onclick="closeAddMerchantModal()" class="text-slate-400 hover:text-slate-600 p-1 rounded-lg">
+                    <i data-lucide="x" class="w-4 h-4"></i>
+                </button>
+            </div>
+
+            <form id="add-merchant-form" onsubmit="createNewMerchant(event)" class="space-y-4">
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="space-y-1 col-span-2 sm:col-span-1">
+                        <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Celé jméno</label>
+                        <input type="text" id="add-merchant-name" required placeholder="např. Roman Novotný" class="w-full p-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500">
+                    </div>
+                    <div class="space-y-1 col-span-2 sm:col-span-1">
+                        <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">URL fotky (Avatar)</label>
+                        <input type="url" id="add-merchant-avatar" placeholder="Ponechte prázdné pro výchozí" class="w-full p-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none">
+                    </div>
+                </div>
+
+                <!-- Výběr měny při zakládání -->
+                <div class="space-y-1">
+                    <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Měna obchodníka</label>
+                    <div class="flex gap-2">
+                        <label class="flex-1 p-2 bg-slate-50 border border-slate-200 rounded-xl flex items-center justify-center gap-1.5 cursor-pointer text-xs font-bold">
+                            <input type="radio" name="add-merchant-currency" value="CZK" checked onchange="handleAddMerchantCurrencyChange('CZK')" class="accent-orange-500"> Kč (CZK)
+                        </label>
+                        <label class="flex-1 p-2 bg-slate-50 border border-slate-200 rounded-xl flex items-center justify-center gap-1.5 cursor-pointer text-xs font-bold">
+                            <input type="radio" name="add-merchant-currency" value="EUR" onchange="handleAddMerchantCurrencyChange('EUR')" class="accent-orange-500"> € (EUR)
+                        </label>
+                    </div>
+                </div>
+
+                <div class="p-4 bg-orange-50/40 border border-orange-100 rounded-2xl space-y-3">
+                    <h4 class="text-xs font-extrabold text-orange-800 uppercase tracking-wider">Základní plán: Červenec 2026</h4>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="space-y-1">
+                            <label class="text-[9px] font-bold text-slate-500" id="add-label-july-bronz">IP Bronz</label>
+                            <input type="number" id="add-july-bronz" value="120000" class="w-full p-2 border border-slate-200 rounded-lg text-xs font-semibold">
+                        </div>
+                        <div class="space-y-1">
+                            <label class="text-[9px] font-bold text-slate-500" id="add-label-july-zlato">IP Zlato</label>
+                            <input type="number" id="add-july-zlato" value="280000" class="w-full p-2 border border-slate-200 rounded-lg text-xs font-semibold">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="p-4 bg-slate-50 border border-slate-100 rounded-2xl space-y-3">
+                    <h4 class="text-xs font-extrabold text-slate-800 uppercase tracking-wider">Základní plán: Srpen 2026</h4>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="space-y-1">
+                            <label class="text-[9px] font-bold text-slate-500" id="add-label-august-bronz">IP Bronz</label>
+                            <input type="number" id="add-august-bronz" value="130000" class="w-full p-2 border border-slate-200 rounded-lg text-xs font-semibold">
+                        </div>
+                        <div class="space-y-1">
+                            <label class="text-[9px] font-bold text-slate-500" id="add-label-august-zlato">IP Zlato</label>
+                            <input type="number" id="add-august-zlato" value="300000" class="w-full p-2 border border-slate-200 rounded-lg text-xs font-semibold">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex gap-2 justify-end pt-3 border-t border-slate-100">
+                    <button type="button" onclick="closeAddMerchantModal()" class="px-5 py-2.5 border border-slate-200 text-slate-500 rounded-xl text-xs font-bold hover:bg-slate-50 transition-all">Storno</button>
+                    <button type="submit" class="px-5 py-2.5 bg-orange-500 hover:bg-orange-600 text-white rounded-xl text-xs font-bold shadow-md shadow-orange-500/10 transition-all">Vytvořit</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!--       MODAL: CUSTOM POTVRZENÍ SMAZÁNÍ      -->
+    <!-- ========================================== -->
+    <div id="delete-confirm-modal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl p-6 max-w-sm w-full border border-slate-100 shadow-2xl text-center space-y-5">
+            <div class="w-14 h-14 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto">
+                <i data-lucide="alert-triangle" class="w-7 h-7"></i>
+            </div>
+            <div>
+                <h3 class="text-base font-extrabold text-slate-900">Opravdu smazat?</h3>
+                <p class="text-slate-500 text-xs mt-1.5 leading-relaxed">Tato akce trvale odstraní obchodníka <strong id="delete-merchant-name-label"></strong> z obou měsíců a vymaže veškeré jeho výsledky.</p>
+            </div>
+            <div class="flex gap-2 pt-2">
+                <button onclick="closeDeleteConfirmModal()" class="w-1/2 p-3 border border-slate-200 text-slate-500 rounded-2xl text-xs font-bold hover:bg-slate-50 transition-all">Zpět</button>
+                <button id="delete-confirm-btn" class="w-1/2 p-3 bg-red-500 hover:bg-red-600 text-white rounded-2xl text-xs font-bold shadow-md shadow-red-500/10 transition-all">Trvale odstranit</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!--          ADMIN PŘIHLAŠOVACÍ MODÁL          -->
+    <!-- ========================================== -->
+    <div id="admin-login-modal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl p-6 md:p-8 max-w-sm w-full border border-slate-100 shadow-2xl relative overflow-hidden">
+            <div class="absolute -top-10 -right-10 w-28 h-28 bg-orange-100 rounded-full blur-lg"></div>
+            
+            <div class="text-center mb-6 relative z-10">
+                <div class="w-14 h-14 bg-orange-50 text-orange-500 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <i data-lucide="shield-check" class="w-7 h-7"></i>
+                </div>
+                <h3 class="text-xl font-extrabold text-slate-950">Přístup k administraci</h3>
+                <p class="text-slate-400 text-xs mt-1">Zadejte váš PIN kód pro otevření editačního módu.</p>
+            </div>
+
+            <div class="space-y-4 relative z-10">
+                <div class="space-y-1">
+                    <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Přístupový PIN</label>
+                    <input type="password" id="admin-pin-input" placeholder="••••" maxlength="8" class="w-full text-center text-2xl tracking-widest p-3 border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500" onkeydown="if(event.key === 'Enter') checkAdminPin()">
+                </div>
+                <div id="admin-login-error" class="hidden text-red-500 text-xs text-center font-bold">Zadali jste nesprávný PIN!</div>
+                
+                <div class="flex gap-2 pt-2">
+                    <button onclick="toggleAdminAuthModal()" class="w-1/2 p-3 border border-slate-200 text-slate-500 rounded-2xl text-xs font-bold hover:bg-slate-50 transition-all">Storno</button>
+                    <button onclick="checkAdminPin()" class="w-1/2 p-3 bg-slate-950 hover:bg-slate-800 text-white rounded-2xl text-xs font-bold transition-all shadow-sm">Ověřit</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="max-w-7xl mx-auto px-6 mt-16 text-center text-slate-400 text-xs border-t border-slate-100 pt-8">
+        <p>© 2026 Letní Sales Booster. Vytvořeno s důrazem na maximální přehlednost a motivaci obchodníků.</p>
+    </footer>
+
+    <!-- JS LOGIKA A DATA -->
+    <script>
+        // MOCK DATA OBCHODNÍKŮ S INDIVIDUÁLNÍMI PLÁNY PRO OBĚ MĚSÍCE (Základní state s Kč i EUR měnou)
+        let salesTeam = [
+            {
+                id: "jan-novak",
+                name: "Jan Novák",
+                currency: "CZK",
+                avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=200",
+                july: {
+                    turnover: 285000,
+                    newClients: 14,
+                    limits: { bronz: 120000, stribro: 200000, zlato: 280000 }
+                },
+                august: {
+                    turnover: 195000,
+                    newClients: 8,
+                    limits: { bronz: 130000, stribro: 215000, zlato: 300000 }
+                }
+            },
+            {
+                id: "petra-svobodova",
+                name: "Petra Svobodová",
+                currency: "EUR",
+                avatar: "https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&q=80&w=200",
+                july: {
+                    turnover: 15600,
+                    newClients: 18,
+                    limits: { bronz: 5000, stribro: 10000, zlato: 15000 }
+                },
+                august: {
+                    turnover: 9600,
+                    newClients: 11,
+                    limits: { bronz: 6000, stribro: 11000, zlato: 16000 }
+                }
+            },
+            {
+                id: "martin-dvorak",
+                name: "Martin Dvořák",
+                currency: "CZK",
+                avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=200",
+                july: {
+                    turnover: 115000,
+                    newClients: 6,
+                    limits: { bronz: 120000, stribro: 190000, zlato: 260000 }
+                },
+                august: {
+                    turnover: 145000,
+                    newClients: 9,
+                    limits: { bronz: 110000, stribro: 190000, zlato: 270000 }
+                }
+            },
+            {
+                id: "lucie-cerna",
+                name: "Lucie Černá",
+                currency: "EUR",
+                avatar: "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&q=80&w=200",
+                july: {
+                    turnover: 9800,
+                    newClients: 15,
+                    limits: { bronz: 5000, stribro: 9000, zlato: 13000 }
+                },
+                august: {
+                    turnover: 11200,
+                    newClients: 12,
+                    limits: { bronz: 5000, stribro: 9000, zlato: 13000 }
+                }
+            },
+            {
+                id: "tomas-kucera",
+                name: "Tomáš Kučera",
+                currency: "CZK",
+                avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=200",
+                july: {
+                    turnover: 215000,
+                    newClients: 9,
+                    limits: { bronz: 130000, stribro: 210000, zlato: 290000 }
+                },
+                august: {
+                    turnover: 310000,
+                    newClients: 15,
+                    limits: { bronz: 130000, stribro: 210000, zlato: 290000 }
+                }
+            }
+        ];
+
+        // MOCK DATA TÝDENNÍCH SOUŤEŽÍ (S automatickým přizpůsobením měny vítěze)
+        let weeklyWinners = [
+            { week: 1, dateRange: "1. 7. – 5. 7.", winnerId: "jan-novak", clients: 5, tieBreakerTurnover: 48000, completed: true },
+            { week: 2, dateRange: "6. 7. – 12. 7.", winnerId: "lucie-cerna", clients: 6, tieBreakerTurnover: 2320, completed: true },
+            { week: 3, dateRange: "13. 7. – 19. 7.", winnerId: "petra-svobodova", clients: 8, tieBreakerTurnover: 3680, completed: true },
+            { week: 4, dateRange: "20. 7. – 26. 7.", winnerId: "tomas-kucera", clients: 7, tieBreakerTurnover: 71000, completed: true },
+            { week: 5, dateRange: "27. 7. – 2. 8.", winnerId: "lucie-cerna", clients: 9, tieBreakerTurnover: 3360, completed: true },
+            { week: 6, dateRange: "3. 8. – 9. 8.", winnerId: null, leadingId: "petra-svobodova", clients: 4, tieBreakerTurnover: 1680, completed: false },
+            { week: 7, dateRange: "10. 8. – 16. 8.", winnerId: null, leadingId: null, clients: 0, tieBreakerTurnover: 0, completed: false },
+            { week: 8, dateRange: "17. 8. – 23. 8.", winnerId: null, leadingId: null, clients: 0, tieBreakerTurnover: 0, completed: false },
+            { week: 9, dateRange: "24. 8. – 31. 8.", winnerId: null, leadingId: null, clients: 0, tieBreakerTurnover: 0, completed: false }
+        ];
+
+        // STATE
+        let currentMonth = 'july';
+        let selectedMerchantId = 'petra-svobodova';
+        let isAdmin = false;
+        let isAdvancedLimitsOpen = false;
+
+        // UNIVERZÁLNÍ FORMÁTOVÁNÍ NATIVNÍ MĚNY OBCHODNÍKA
+        function formatMerchantMoney(amount, currency) {
+            if (currency === "EUR") {
+                return new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(amount);
+            }
+            return new Intl.NumberFormat('cs-CZ', { style: 'currency', currency: 'CZK', maximumFractionDigits: 0 }).format(amount);
+        }
+
+        // SEZÓNNÍ DUÁLNÍ PŘEPOČET (EUR/CZK standardním poměrem 1:25)
+        function formatSecondaryMoney(amount, sourceCurrency) {
+            if (sourceCurrency === "EUR") {
+                // Přepočet z EUR na CZK
+                const czk = amount * 25;
+                return formatMerchantMoney(czk, "CZK");
+            } else {
+                // Přepočet z CZK na EUR
+                const eur = Math.round(amount / 25);
+                return formatMerchantMoney(eur, "EUR");
+            }
+        }
+
+        // VISUALIZACE TOAST NOTIFIKACÍ
+        function showNotification(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `p-4 rounded-2xl shadow-xl text-xs font-bold transition-all duration-300 transform translate-x-20 pointer-events-auto flex items-center gap-2 border bg-white ${
+                type === 'success' ? 'border-emerald-100 text-emerald-800' : 'border-red-100 text-red-800'
+            }`;
+            toast.innerHTML = `
+                <i data-lucide="${type === 'success' ? 'check-circle-2' : 'alert-circle'}" class="w-4 h-4 ${type === 'success' ? 'text-emerald-500' : 'text-red-500'}"></i>
+                <span>${message}</span>
+            `;
+            container.appendChild(toast);
+            lucide.createIcons();
+            
+            setTimeout(() => {
+                toast.classList.remove('translate-x-20');
+                toast.classList.add('translate-x-0');
+            }, 50);
+
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-x-20');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        // URČENÍ TARIFU PODLE PLNĚNÍ PLANU (Vždy garantuje provizi minimálně 20 %)
+        function getTierInfo(turnover, limits, currency) {
+            const symbol = currency === "EUR" ? "€" : "Kč";
+            if (turnover >= limits.zlato) {
+                return { tier: 'zlato', rate: 30, colorClass: 'ring-tier-zlato', bgClass: 'bg-yellow-50 text-yellow-700 border-yellow-200/50', text: 'Zlaté pásmo (30 %)', label: 'Zlatý tarif 30%' };
+            } else if (turnover >= limits.stribro) {
+                return { tier: 'stribro', rate: 25, colorClass: 'ring-tier-stribro', bgClass: 'bg-slate-100 text-slate-700 border-slate-200/50', text: 'Stříbrné pásmo (25 %)', label: 'Stříbrný tarif 25%' };
+            } else if (turnover >= limits.bronz) {
+                return { tier: 'bronz', rate: 20, colorClass: 'ring-tier-bronz', bgClass: 'bg-amber-50 text-[#a15c0f] border-amber-200/50', text: 'Bronzové pásmo (20 %)', label: 'Bronzový tarif 20%' };
+            } else {
+                return { tier: 'none', rate: 20, colorClass: 'ring-tier-none', bgClass: 'bg-slate-50 text-slate-500 border-slate-200/30', text: 'Základní provize (20 %)', label: 'Základní tarif 20%' };
+            }
+        }
+
+        // PŘEPÍNÁNÍ MĚSÍCE
+        function switchMonth(month) {
+            currentMonth = month;
+            const btnJuly = document.getElementById('btn-july');
+            const btnAugust = document.getElementById('btn-august');
+            
+            if (month === 'july') {
+                btnJuly.className = "px-5 py-2 rounded-xl text-xs font-extrabold transition-all duration-300 flex items-center gap-1.5 bg-white text-orange-600 shadow-sm";
+                btnAugust.className = "px-5 py-2 rounded-xl text-xs font-extrabold transition-all duration-300 flex items-center gap-1.5 text-slate-500 hover:text-slate-900";
+            } else {
+                btnAugust.className = "px-5 py-2 rounded-xl text-xs font-extrabold transition-all duration-300 flex items-center gap-1.5 bg-white text-orange-600 shadow-sm";
+                btnJuly.className = "px-5 py-2 rounded-xl text-xs font-extrabold transition-all duration-300 flex items-center gap-1.5 text-slate-500 hover:text-slate-900";
+            }
+
+            renderDashboard();
+            if (isAdmin) {
+                renderAdminDashboard();
+            }
+        }
+
+        // SIMULÁTOR OBRATU SLIDER
+        function handleSliderChange(val) {
+            const tempTurnover = parseInt(val);
+            const merchant = salesTeam.find(m => m.id === selectedMerchantId);
+            if (!merchant) return;
+
+            const simulatedText = document.getElementById('simulated-turnover-text');
+            if (simulatedText) {
+                simulatedText.innerText = formatMerchantMoney(tempTurnover, merchant.currency);
+            }
+            
+            const data = merchant[currentMonth];
+            const limits = data.limits;
+            
+            const tierInfo = getTierInfo(tempTurnover, limits, merchant.currency);
+            const simulatedCommission = Math.round(tempTurnover * (tierInfo.rate / 100));
+            
+            const rateText = document.getElementById('sim-current-rate');
+            const commText = document.getElementById('sim-total-comm');
+            if (rateText) rateText.innerText = tierInfo.rate + "%";
+            if (commText) commText.innerText = formatMerchantMoney(simulatedCommission, merchant.currency);
+            
+            // Překreslit pouze dynamickou část karty (Roadmapu)
+            const dynamicPart = document.getElementById('detail-card-dynamic-part');
+            if (dynamicPart) {
+                dynamicPart.innerHTML = renderDynamicDetailPart(tempTurnover);
+                lucide.createIcons();
+            }
+
+            const simMissingText = document.getElementById('sim-missing-text');
+            if (simMissingText) {
+                if (tierInfo.tier === 'none') {
+                    simMissingText.innerHTML = `K dosažení Bronzového plánu (20 %) potřebujete získat ještě <strong class="text-orange-600 font-bold">${formatMerchantMoney(limits.bronz - tempTurnover, merchant.currency)}</strong>.`;
+                } else if (tierInfo.tier === 'bronz') {
+                    simMissingText.innerHTML = `K odemčení 25% tarifu potřebujete získat ještě <strong class="text-slate-700 font-bold">${formatMerchantMoney(limits.stribro - tempTurnover, merchant.currency)}</strong>.`;
+                } else if (tierInfo.tier === 'stribro') {
+                    simMissingText.innerHTML = `K odemčení nejvyššího 30% zlatého tarifu potřebujete získat ještě <strong class="text-yellow-600 font-bold">${formatMerchantMoney(limits.zlato - tempTurnover, merchant.currency)}</strong>.`;
+                } else {
+                    simMissingText.innerHTML = `<span class="text-emerald-600 font-bold">Skvělé!</span> Jste na absolutním zlatém maximu 30%!`;
+                }
+            }
+        }
+
+        // RESET SIMULACE NA REÁLNÁ DATA
+        function resetSimulation() {
+            const merchant = salesTeam.find(m => m.id === selectedMerchantId);
+            if (!merchant) return;
+            renderMerchantDetail();
+            showNotification("Simulátor byl vrácen do reálného stavu.");
+        }
+
+        // AKTUALIZACE TEPLOMĚRU PRO DETAILNÍ KARTU
+        function updateThermometer(turnover, limits) {
+            const maxVal = limits.zlato * 1.25; 
+            const percentage = Math.min((turnover / maxVal) * 100, 100);
+            
+            const bar = document.getElementById('thermometer-progress-bar');
+            if (bar) {
+                bar.style.width = percentage + '%';
+                bar.className = "h-full rounded-full transition-all duration-300 relative bg-gradient-to-r";
+                if (turnover >= limits.zlato) {
+                    bar.classList.add("from-amber-500", "to-yellow-400");
+                } else if (turnover >= limits.stribro) {
+                    bar.classList.add("from-slate-500", "to-slate-400");
+                } else if (turnover >= limits.bronz) {
+                    bar.classList.add("from-orange-500", "to-amber-500");
+                } else {
+                    bar.classList.add("from-slate-300", "to-slate-200");
+                }
+            }
+
+            const cPin = document.getElementById('current-pin');
+            if (cPin) cPin.style.left = percentage + '%';
+        }
+
+        // VÝBĚR AKTIVNÍHO OBCHODNÍKA V SEZNAMU
+        function selectMerchant(id) {
+            selectedMerchantId = id;
+            
+            document.querySelectorAll('.merchant-list-card').forEach(card => {
+                card.classList.remove('border-orange-500/40', 'bg-orange-50/10');
+                card.classList.add('border-slate-100');
+            });
+
+            const activeCard = document.getElementById(`list-card-${id}`);
+            if (activeCard) {
+                activeCard.classList.remove('border-slate-100');
+                activeCard.classList.add('border-orange-500/40', 'bg-orange-50/10');
+            }
+
+            renderMerchantDetail();
+        }
+
+        // GENEROVÁNÍ DYNAMICKÉ ČÁSTI DETAILU (Používá se pro real i simulační vykreslení s nativní měnou)
+        function renderDynamicDetailPart(turnover) {
+            const merchant = salesTeam.find(m => m.id === selectedMerchantId);
+            if (!merchant) return '';
+
+            const data = merchant[currentMonth];
+            const limits = data.limits;
+            const tierInfo = getTierInfo(turnover, limits, merchant.currency);
+            const commissionAmount = Math.round(turnover * (tierInfo.rate / 100));
+
+            // Výpočty pro milníky
+            // 1. Bronzový milník
+            const isBronzCompleted = turnover >= limits.bronz;
+            const isBronzActive = turnover < limits.bronz;
+            const bronzProgress = Math.min((turnover / limits.bronz) * 100, 100);
+            const bronzMissing = limits.bronz - turnover;
+
+            // 2. Stříbrný milník
+            const isStribroCompleted = turnover >= limits.stribro;
+            const isStribroActive = turnover >= limits.bronz && turnover < limits.stribro;
+            const isStribroLocked = turnover < limits.bronz;
+            let stribroProgress = 0;
+            if (isStribroCompleted) stribroProgress = 100;
+            else if (isStribroActive) stribroProgress = ((turnover - limits.bronz) / (limits.stribro - limits.bronz)) * 100;
+            const stribroMissing = limits.stribro - turnover;
+
+            // 3. Zlatý milník
+            const isZlatoCompleted = turnover >= limits.zlato;
+            const isZlatoActive = turnover >= limits.stribro && turnover < limits.zlato;
+            const isZlatoLocked = turnover < limits.stribro;
+            let zlatoProgress = 0;
+            if (isZlatoCompleted) zlatoProgress = 100;
+            else if (isZlatoActive) zlatoProgress = ((turnover - limits.stribro) / (limits.zlato - limits.stribro)) * 100;
+            const zlatoMissing = limits.zlato - turnover;
+
+            // Globální text u spodního banneru podle milníku
+            let milestoneNoticeText = "";
+            let milestoneRemainingText = "";
+            if (tierInfo.tier === 'none') {
+                milestoneNoticeText = `K dosažení Bronzového plánu (20 %) chybí:`;
+                milestoneRemainingText = `${formatMerchantMoney(bronzMissing, merchant.currency)}`;
+            } else if (tierInfo.tier === 'bronz') {
+                milestoneNoticeText = `K odemčení Stříbra (25 %) chybí:`;
+                milestoneRemainingText = `${formatMerchantMoney(stribroMissing, merchant.currency)}`;
+            } else if (tierInfo.tier === 'stribro') {
+                milestoneNoticeText = `K odemčení Zlata (30 %) chybí:`;
+                milestoneRemainingText = `${formatMerchantMoney(zlatoMissing, merchant.currency)}`;
+            } else {
+                milestoneNoticeText = `Odemčen nejvyšší bonus!`;
+                milestoneRemainingText = `Zlaté pásmo (30 %)`;
+            }
+
+            return `
+                <!-- Hlavička karty -->
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pb-4 border-b border-slate-100">
+                    <div class="flex items-center gap-3">
+                        <img src="${merchant.avatar}" alt="${merchant.name}" class="w-14 h-14 rounded-2xl object-cover ring-2 ring-slate-100">
+                        <div>
+                            <h3 class="text-xl font-extrabold text-slate-900">${merchant.name}</h3>
+                            <span class="inline-block text-[10px] px-2.5 py-0.5 rounded-full font-bold border ${tierInfo.bgClass} mt-1">
+                                ${tierInfo.label}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="text-right sm:text-right">
+                        <span class="text-[9px] font-extrabold text-slate-400 uppercase tracking-widest block">Sazba provize</span>
+                        <h4 class="text-3xl font-black text-orange-600">${tierInfo.rate}%</h4>
+                    </div>
+                </div>
+
+                <!-- Přehled 3 hlavních čísel -->
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                    <div class="bg-slate-50 rounded-2xl p-4 border border-slate-100">
+                        <span class="text-[9px] font-extrabold text-slate-400 uppercase tracking-wider block">Obrat obchodníka</span>
+                        <p class="text-base font-extrabold text-slate-800 mt-1">${formatMerchantMoney(turnover, merchant.currency)}</p>
+                        <span class="text-xs text-slate-400 font-medium">Equiv: ${formatSecondaryMoney(turnover, merchant.currency)}</span>
+                    </div>
+                    <div class="bg-slate-50 rounded-2xl p-4 border border-slate-100">
+                        <span class="text-[9px] font-extrabold text-slate-400 uppercase tracking-wider block">Noví klienti (Akvizice)</span>
+                        <p class="text-base font-extrabold text-emerald-600 mt-1">${data.newClients} nově</p>
+                        <span class="text-xs text-slate-400 font-medium">Týdenní soutěž</span>
+                    </div>
+                    <div class="bg-slate-50 rounded-2xl p-4 border border-slate-100 col-span-2 md:col-span-1">
+                        <span class="text-[9px] font-extrabold text-slate-400 uppercase tracking-wider block">Aktuální výplata</span>
+                        <p class="text-base font-extrabold text-slate-800 mt-1 text-orange-600">${formatMerchantMoney(commissionAmount, merchant.currency)}</p>
+                        <span class="text-xs text-slate-400 font-medium">Equiv: ${formatSecondaryMoney(commissionAmount, merchant.currency)}</span>
+                    </div>
+                </div>
+
+                <!-- TEPLOMĚR (Cílová osa) -->
+                <div class="space-y-2 pt-1">
+                    <span class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider block">Celkový pokrok měsíce:</span>
+                    <div class="relative pt-6 pb-2">
+                        <div class="h-3 bg-slate-100 rounded-full relative border border-slate-200/50">
+                            <div id="thermometer-progress-bar" class="h-full rounded-full transition-all duration-500 relative" style="width: 0%"></div>
+                            
+                            <!-- Špendlík aktuálního stavu -->
+                            <div id="current-pin" class="absolute top-0 -mt-7 -translate-x-1/2 flex flex-col items-center transition-all duration-500">
+                                <span class="bg-slate-900 text-white text-[9px] font-extrabold px-1.5 py-0.5 rounded-md shadow-sm">Můj stav</span>
+                                <div class="w-1.5 h-1.5 bg-slate-900 rotate-45 -mt-1"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- DETAILEJNÍ ROADMAPA S MILNÍKY -->
+                <div class="space-y-4">
+                    <span class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider block">Plnění letních milníků:</span>
+                    
+                    <div class="space-y-3">
+                        <!-- 1. Bronz Milník Card -->
+                        <div class="p-4 rounded-2xl border transition-all duration-300 ${isBronzCompleted ? 'bg-emerald-50/40 border-emerald-100/80 text-emerald-800' : isBronzActive ? 'bg-orange-50/50 border-orange-200 ring-2 ring-orange-500/10 text-orange-950 shadow-sm' : 'bg-slate-50/30 border-slate-100 text-slate-400'}">
+                            <div class="flex items-center justify-between gap-4">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-8 h-8 rounded-full flex items-center justify-center ${isBronzCompleted ? 'bg-emerald-100 text-emerald-600' : 'bg-orange-100 text-orange-600 animate-pulse'}">
+                                        <i data-lucide="${isBronzCompleted ? 'check' : 'target'}" class="w-4 h-4"></i>
+                                    </div>
+                                    <div>
+                                        <span class="text-[9px] font-extrabold uppercase tracking-wider ${isBronzCompleted ? 'text-emerald-500' : 'text-orange-500'}">1. Bronzové pásmo (20% provize)</span>
+                                        <h5 class="text-xs font-bold text-slate-800 mt-0.5">Cílový obrat: ${formatMerchantMoney(limits.bronz, merchant.currency)}</h5>
+                                    </div>
+                                </div>
+                                <div class="text-right">
+                                    <span class="text-xs font-black ${isBronzCompleted ? 'text-emerald-600' : 'text-orange-600'}">
+                                        ${isBronzCompleted ? 'Splněno! 🎉' : `Chybí ${formatMerchantMoney(bronzMissing, merchant.currency)}`}
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="mt-3 w-full bg-slate-100 rounded-full h-1.5 overflow-hidden border border-slate-200/40">
+                                <div class="h-full rounded-full transition-all duration-500 ${isBronzCompleted ? 'bg-emerald-500' : 'bg-orange-500'}" style="width: ${bronzProgress}%"></div>
+                            </div>
+                        </div>
+
+                        <!-- 2. Stříbro Milník Card -->
+                        <div class="p-4 rounded-2xl border transition-all duration-300 ${isStribroCompleted ? 'bg-emerald-50/40 border-emerald-100/80 text-emerald-800' : isStribroActive ? 'bg-orange-50/50 border-orange-200 ring-2 ring-orange-500/10 text-orange-950 shadow-sm' : 'bg-slate-50/30 border-slate-100 text-slate-400'}">
+                            <div class="flex items-center justify-between gap-4">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-8 h-8 rounded-full flex items-center justify-center ${isStribroCompleted ? 'bg-emerald-100 text-emerald-600' : isStribroActive ? 'bg-orange-100 text-orange-600 animate-pulse' : 'bg-slate-100 text-slate-400'}">
+                                        <i data-lucide="${isStribroCompleted ? 'check' : isStribroActive ? 'target' : 'lock'}" class="w-4 h-4"></i>
+                                    </div>
+                                    <div>
+                                        <span class="text-[9px] font-extrabold uppercase tracking-wider ${isStribroCompleted ? 'text-emerald-500' : isStribroActive ? 'text-orange-500' : 'text-slate-400'}">2. Stříbrné pásmo (25% provize)</span>
+                                        <h5 class="text-xs font-bold text-slate-800 mt-0.5">Cílový obrat: ${formatMerchantMoney(limits.stribro, merchant.currency)}</h5>
+                                    </div>
+                                </div>
+                                <div class="text-right">
+                                    <span class="text-xs font-black ${isStribroCompleted ? 'text-emerald-600' : isStribroActive ? 'text-orange-600' : 'text-slate-400'}">
+                                        ${isStribroCompleted ? 'Splněno! 🎉' : isStribroActive ? `Chybí ${formatMerchantMoney(stribroMissing, merchant.currency)}` : 'Uzamčeno'}
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="mt-3 w-full bg-slate-100 rounded-full h-1.5 overflow-hidden border border-slate-200/40">
+                                <div class="h-full rounded-full transition-all duration-500 ${isStribroCompleted ? 'bg-emerald-500' : isStribroActive ? 'bg-orange-500' : 'bg-slate-200'}" style="width: ${stribroProgress}%"></div>
+                            </div>
+                        </div>
+
+                        <!-- 3. Zlato Milník Card -->
+                        <div class="p-4 rounded-2xl border transition-all duration-300 ${isZlatoCompleted ? 'bg-emerald-50/40 border-emerald-100/80 text-emerald-800' : isZlatoActive ? 'bg-orange-50/50 border-orange-200 ring-2 ring-orange-500/10 text-orange-950 shadow-sm' : 'bg-slate-50/30 border-slate-100 text-slate-400'}">
+                            <div class="flex items-center justify-between gap-4">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-8 h-8 rounded-full flex items-center justify-center ${isZlatoCompleted ? 'bg-emerald-100 text-emerald-600' : isZlatoActive ? 'bg-orange-100 text-orange-600 animate-pulse' : 'bg-slate-100 text-slate-400'}">
+                                        <i data-lucide="${isZlatoCompleted ? 'check' : isZlatoActive ? 'target' : 'lock'}" class="w-4 h-4"></i>
+                                    </div>
+                                    <div>
+                                        <span class="text-[9px] font-extrabold uppercase tracking-wider ${isZlatoCompleted ? 'text-emerald-500' : isZlatoActive ? 'text-orange-500' : 'text-slate-400'}">3. Zlaté pásmo (30% provize)</span>
+                                        <h5 class="text-xs font-bold text-slate-800 mt-0.5">Cílový obrat: ${formatMerchantMoney(limits.zlato, merchant.currency)}</h5>
+                                    </div>
+                                </div>
+                                <div class="text-right">
+                                    <span class="text-xs font-black ${isZlatoCompleted ? 'text-emerald-600' : isZlatoActive ? 'text-orange-600' : 'text-slate-400'}">
+                                        ${isZlatoCompleted ? 'Splněno! 🎉' : isZlatoActive ? `Chybí ${formatMerchantMoney(zlatoMissing, merchant.currency)}` : 'Uzamčeno'}
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="mt-3 w-full bg-slate-100 rounded-full h-1.5 overflow-hidden border border-slate-200/40">
+                                <div class="h-full rounded-full transition-all duration-500 ${isZlatoCompleted ? 'bg-emerald-500' : isZlatoActive ? 'bg-orange-500' : 'bg-slate-200'}" style="width: ${zlatoProgress}%"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Spodní rychlý informační banner -->
+                    <div class="p-4 bg-orange-50/30 border border-orange-100 rounded-2xl flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <div class="p-2 bg-white rounded-xl shadow-sm text-orange-500">
+                                <i data-lucide="info" class="w-4 h-4"></i>
+                            </div>
+                            <span class="text-slate-600 font-bold text-xs">${milestoneNoticeText}</span>
+                        </div>
+                        <span class="text-slate-900 font-black text-sm text-right">${milestoneRemainingText}</span>
+                    </div>
+                </div>
+            `;
+        }
+
+        // RENDEROVÁNÍ PRAVÉ DETAILNÍ KARTY (Celá konstrukce s odděleným sliderem)
+        function renderMerchantDetail() {
+            const merchant = salesTeam.find(m => m.id === selectedMerchantId);
+            if (!merchant) {
+                document.getElementById('merchant-detail-card').innerHTML = `
+                    <div class="h-full flex flex-col items-center justify-center p-8 text-center text-slate-400 space-y-2">
+                        <i data-lucide="users" class="w-10 h-10"></i>
+                        <p class="font-bold">Nebyl vybrán žádný obchodník</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const data = merchant[currentMonth];
+            const limits = data.limits;
+            const tierInfo = getTierInfo(data.turnover, limits, merchant.currency);
+            const commissionAmount = Math.round(data.turnover * (tierInfo.rate / 100));
+
+            const detailCard = document.getElementById('merchant-detail-card');
+            
+            // Určení kroku a maximální hodnoty pro slider podle měny
+            const sliderMax = limits.zlato * 1.5;
+            const sliderStep = merchant.currency === "EUR" ? 100 : 5000;
+            
+            detailCard.innerHTML = `
+                <!-- DYNAMICKÁ RE-RENDEROVATELNÁ ČÁST -->
+                <div id="detail-card-dynamic-part" class="space-y-6">
+                    ${renderDynamicDetailPart(data.turnover)}
+                </div>
+
+                <!-- STATICKÁ ČÁST -->
+                <div id="detail-card-static-part" class="border-t border-slate-100 pt-5 space-y-4">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <h4 class="text-xs font-extrabold text-slate-800 flex items-center gap-1">
+                                <i data-lucide="calculator" class="text-orange-500 w-4 h-4"></i> Interaktivní simulátor úspěchu
+                            </h4>
+                            <p class="text-[10px] text-slate-400 mt-0.5">Vyzkoušejte posunout slider a sledujte, o kolik se zvednou provize.</p>
+                        </div>
+                        <button onclick="resetSimulation()" class="text-[10px] font-extrabold text-orange-500 bg-orange-50 hover:bg-orange-100 border border-orange-100 px-2.5 py-1.5 rounded-lg transition-all flex items-center gap-1">
+                            <i data-lucide="rotate-ccw" class="w-3 h-3"></i> Resetovat
+                        </button>
+                    </div>
+
+                    <div class="space-y-3">
+                        <div class="flex justify-between items-center text-xs font-bold text-slate-500">
+                            <span>Simulovat měsíční obrat</span>
+                            <span id="simulated-turnover-text" class="text-orange-600 font-black">${formatMerchantMoney(data.turnover, merchant.currency)}</span>
+                        </div>
+                        
+                        <input 
+                            type="range" 
+                            id="simulation-slider"
+                            min="0" 
+                            max="${sliderMax}" 
+                            step="${sliderStep}"
+                            value="${data.turnover}" 
+                            class="w-full accent-orange-500 cursor-pointer"
+                            oninput="handleSliderChange(this.value)"
+                        >
+                        
+                        <!-- Výsledky simulace v rámečku -->
+                        <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100 grid grid-cols-2 gap-4 text-xs">
+                            <div>
+                                <span class="text-slate-400 block font-semibold uppercase">Simulovaná sazba</span>
+                                <strong id="sim-current-rate" class="text-lg text-slate-900 font-black">${tierInfo.rate}%</strong>
+                            </div>
+                            <div>
+                                <span class="text-slate-400 block font-semibold uppercase">Simulovaná výplata</span>
+                                <strong id="sim-total-comm" class="text-lg text-orange-600 font-black">${formatMerchantMoney(commissionAmount, merchant.currency)}</strong>
+                            </div>
+                            <div class="col-span-2 text-slate-500 pt-2.5 border-t border-slate-200" id="sim-missing-text">
+                                ${tierInfo.tier === 'none' ? `K dosažení Bronzového plánu (20 %) potřebujete získat ještě <strong class="text-orange-600 font-bold">${formatMerchantMoney(limits.bronz - data.turnover, merchant.currency)}</strong>.` : ''}
+                                ${tierInfo.tier === 'bronz' ? `K odemčení 25% tarifu potřebujete získat ještě <strong class="text-slate-700 font-bold">${formatMerchantMoney(limits.stribro - data.turnover, merchant.currency)}</strong>.` : ''}
+                                ${tierInfo.tier === 'stribro' ? `K odemčení nejvyššího 30% zlatého tarifu potřebujete získat ještě <strong class="text-yellow-600 font-bold">${formatMerchantMoney(limits.zlato - data.turnover, merchant.currency)}</strong>.` : ''}
+                                ${tierInfo.tier === 'zlato' ? `<span class="text-emerald-600 font-bold">Skvělé!</span> Jste v nejvyšším možném tarifním pásmu.` : ''}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            lucide.createIcons();
+            updateThermometer(data.turnover, limits);
+        }
+
+        // RENDEROVÁNÍ KOREKTNÍHO SEZNAMU OBCHODNÍKŮ (LEVY PANEL)
+        function renderMembersList() {
+            const listContainer = document.getElementById('members-list');
+            listContainer.innerHTML = salesTeam.map(merchant => {
+                const data = merchant[currentMonth];
+                const tierInfo = getTierInfo(data.turnover, data.limits, merchant.currency);
+                const isSelected = merchant.id === selectedMerchantId;
+
+                const completionPercent = Math.min((data.turnover / data.limits.zlato) * 100, 100);
+
+                return `
+                    <div 
+                        id="list-card-${merchant.id}"
+                        onclick="selectMerchant('${merchant.id}')"
+                        class="merchant-list-card p-3 rounded-2xl border-2 cursor-pointer flex items-center justify-between gap-3 transition-all duration-300 hover:bg-slate-50/50 ${isSelected ? 'border-orange-500/40 bg-orange-50/10' : 'border-slate-100'}"
+                    >
+                        <div class="flex items-center gap-3">
+                            <div class="relative">
+                                <img src="${merchant.avatar}" alt="${merchant.name}" class="w-11 h-11 rounded-xl object-cover ${tierInfo.colorClass}">
+                                <span class="absolute -bottom-1 -right-1 w-5 h-5 rounded-full border-2 border-white flex items-center justify-center text-[8px] font-black ${
+                                    tierInfo.tier === 'zlato' ? 'bg-yellow-400 text-slate-900' : 
+                                    tierInfo.tier === 'stribro' ? 'bg-slate-300 text-slate-900' : 
+                                    tierInfo.tier === 'bronz' ? 'bg-[#d97706] text-white' : 'bg-slate-400 text-white'
+                                }">
+                                    ${tierInfo.rate}%
+                                </span>
+                            </div>
+                            <div>
+                                <h4 class="font-extrabold text-xs text-slate-900 flex items-center gap-1">
+                                    <span>${merchant.name}</span>
+                                    <span class="text-[9px] px-1 bg-slate-100 rounded text-slate-500 uppercase font-black">${merchant.currency}</span>
+                                </h4>
+                                <span class="text-[9px] font-bold text-slate-400">Akvizice: ${data.newClients} nově</span>
+                            </div>
+                        </div>
+
+                        <!-- Mini obrat a progress -->
+                        <div class="text-right flex flex-col items-end gap-1">
+                            <span class="text-[10px] text-orange-600 font-extrabold">${formatMerchantMoney(data.turnover, merchant.currency)}</span>
+                            <div class="w-16 h-1.5 bg-slate-100 rounded-full overflow-hidden border border-slate-200/50">
+                                <div class="h-full bg-orange-500" style="width: ${completionPercent}%"></div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            document.getElementById('team-count').innerText = `${salesTeam.length} lidí`;
+        }
+
+        // RENDEROVÁNÍ KOMPLETNÍHO DASHBOARDU
+        function renderDashboard() {
+            let totalTurnoverCZK = 0;
+            let topCommMerchant = null;
+            let topCommValueNormalized = -1; // Pro správné porovnání provizí napříč Kč a EUR
+            let topHunterMerchant = null;
+            let topHunterValue = -1;
+            let totalCommissionPercentage = 0;
+
+            salesTeam.forEach(merchant => {
+                const data = merchant[currentMonth];
+                
+                // Přepočet do CZK na pozadí pro globální agregaci
+                const turnoverInCZK = merchant.currency === "EUR" ? data.turnover * 25 : data.turnover;
+                totalTurnoverCZK += turnoverInCZK;
+
+                const tierInfo = getTierInfo(data.turnover, data.limits, merchant.currency);
+                totalCommissionPercentage += tierInfo.rate;
+
+                const commissionInNative = data.turnover * (tierInfo.rate / 100);
+                const commissionInCZK = merchant.currency === "EUR" ? commissionInNative * 25 : commissionInNative;
+
+                if (commissionInCZK > topCommValueNormalized) {
+                    topCommValueNormalized = commissionInCZK;
+                    topCommMerchant = merchant;
+                }
+
+                if (data.newClients > topHunterValue) {
+                    topHunterValue = data.newClients;
+                    topHunterMerchant = merchant;
+                }
+            });
+
+            // Hlavní ukazatele (Vždy CZK s duálním EUR equiv)
+            document.getElementById('stat-total-turnover').innerText = formatMerchantMoney(totalTurnoverCZK, "CZK");
+            document.getElementById('stat-total-turnover-secondary').innerText = `Equiv: ${formatMerchantMoney(Math.round(totalTurnoverCZK / 25), "EUR")}`;
+            
+            if (topCommMerchant) {
+                document.getElementById('stat-top-commission').innerText = topCommMerchant.name;
+                const data = topCommMerchant[currentMonth];
+                const tierInfo = getTierInfo(data.turnover, data.limits, topCommMerchant.currency);
+                const activeCommNative = data.turnover * (tierInfo.rate / 100);
+                document.getElementById('stat-top-commission-value').innerText = `${formatMerchantMoney(activeCommNative, topCommMerchant.currency)} (${tierInfo.rate}% provize)`;
+            } else {
+                document.getElementById('stat-top-commission').innerText = "Zatím nikdo";
+                document.getElementById('stat-top-commission-value').innerText = "0 Kč";
+            }
+            
+            if (topHunterMerchant && topHunterValue > 0) {
+                document.getElementById('stat-top-hunter').innerText = topHunterMerchant.name;
+                document.getElementById('stat-top-hunter-value').innerText = `${topHunterValue} nových klientů`;
+            } else {
+                document.getElementById('stat-top-hunter').innerText = "Zatím nikdo";
+                document.getElementById('stat-top-hunter-value').innerText = "0 akvizic";
+            }
+
+            const avgComm = salesTeam.length > 0 ? (totalCommissionPercentage / salesTeam.length).toFixed(1) : 0;
+            document.getElementById('stat-avg-commission').innerText = `${avgComm} %`;
+
+            // STUPNĚ VÍTĚZŮ
+            const sortedByTurnover = [...salesTeam].sort((a, b) => {
+                const turnA = a.currency === "EUR" ? a[currentMonth].turnover * 25 : a[currentMonth].turnover;
+                const turnB = b.currency === "EUR" ? b[currentMonth].turnover * 25 : b[currentMonth].turnover;
+                return turnB - turnA;
+            });
+            const podiumContainer = document.getElementById('podium-container');
+            
+            const podiumData = [
+                { rank: 2, item: sortedByTurnover[1], bg: 'bg-slate-50 border border-slate-100', badge: 'bg-slate-200 text-slate-800' },
+                { rank: 1, item: sortedByTurnover[0], bg: 'bg-orange-50/50 border border-orange-100 shadow-sm', badge: 'bg-orange-500 text-white' },
+                { rank: 3, item: sortedByTurnover[2], bg: 'bg-amber-50/20 border border-amber-100', badge: 'bg-amber-100 text-amber-900' }
+            ];
+
+            podiumContainer.innerHTML = podiumData.map(p => {
+                if (!p.item) return `
+                    <div class="bg-slate-50/50 rounded-2xl p-5 text-center text-slate-400 border border-dashed border-slate-200 flex flex-col items-center justify-center min-h-[140px]">
+                        <span class="text-xs font-bold">${p.rank}. pozice neobsazena</span>
+                    </div>
+                `;
+                const pData = p.item[currentMonth];
+                const tierInfo = getTierInfo(pData.turnover, pData.limits, p.item.currency);
+                return `
+                    <div class="${p.bg} rounded-3xl p-5 flex flex-col sm:flex-row items-center gap-4 transition-all duration-300 hover:scale-[1.01] cursor-pointer" onclick="selectMerchant('${p.item.id}')">
+                        <div class="relative">
+                            <img src="${p.item.avatar}" alt="${p.item.name}" class="w-14 h-14 rounded-2xl object-cover ring-2 ring-white">
+                            <span class="absolute -top-1.5 -right-1.5 w-6 h-6 rounded-full flex items-center justify-center font-bold text-xs ${p.badge}">
+                                ${p.rank}
+                            </span>
+                        </div>
+                        <div class="text-center sm:text-left flex-1 space-y-1">
+                            <h4 class="font-extrabold text-sm text-slate-900 flex items-center justify-center sm:justify-start gap-1">
+                                <span>${p.item.name}</span>
+                                <span class="text-[8px] px-1 bg-white rounded border uppercase font-black">${p.item.currency}</span>
+                            </h4>
+                            <p class="text-xs font-black text-orange-600">${formatMerchantMoney(pData.turnover, p.item.currency)}</p>
+                            <span class="inline-block text-[9px] px-2 py-0.5 rounded-full font-bold bg-white border border-slate-100 text-slate-600">
+                                Sazba: ${tierInfo.rate}%
+                            </span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            // TÝDENNÍ VÝZVY (SÍŇ SLÁVY)
+            const weeklyGrid = document.getElementById('weekly-winners-grid');
+            weeklyGrid.innerHTML = weeklyWinners.map(weekData => {
+                if (weekData.completed) {
+                    const winner = salesTeam.find(m => m.id === weekData.winnerId);
+                    if (!winner) return '';
+                    const rewardText = winner.currency === "EUR" ? "40 €" : "1 000 Kč";
+                    return `
+                        <!-- Vyhodnocený týden -->
+                        <div class="bg-slate-50 border border-slate-100/80 rounded-2xl p-4 flex items-center justify-between gap-3">
+                            <div class="flex items-center gap-3">
+                                <img src="${winner.avatar}" alt="${winner.name}" class="w-10 h-10 rounded-xl object-cover border-2 border-white">
+                                <div>
+                                    <span class="text-[9px] text-slate-400 font-extrabold uppercase block">${weekData.week}. týden (${weekData.dateRange})</span>
+                                    <h4 class="font-bold text-xs text-slate-900">${winner.name}</h4>
+                                    <span class="text-[10px] text-emerald-600 font-bold flex items-center gap-0.5 mt-0.5">
+                                        <i data-lucide="user-check" class="w-3 h-3"></i> ${weekData.clients} klientů (Tie: ${formatMerchantMoney(weekData.tieBreakerTurnover, winner.currency)})
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <span class="text-xs font-black text-emerald-600 block">+ ${rewardText}</span>
+                                <span class="text-[8px] text-slate-400 font-bold uppercase tracking-wider block">Vyplaceno</span>
+                            </div>
+                        </div>
+                    `;
+                } else if (weekData.leadingId) {
+                    const leader = salesTeam.find(m => m.id === weekData.leadingId);
+                    if (!leader) return '';
+                    return `
+                        <!-- Probíhající týden -->
+                        <div class="bg-orange-50/20 border border-orange-100 rounded-2xl p-4 flex items-center justify-between gap-3">
+                            <div class="flex items-center gap-3">
+                                <img src="${leader.avatar}" alt="${leader.name}" class="w-10 h-10 rounded-xl object-cover border-2 border-white">
+                                <div>
+                                    <span class="text-[9px] text-orange-600 font-extrabold uppercase block">${weekData.week}. týden (${weekData.dateRange})</span>
+                                    <h4 class="font-bold text-xs text-slate-900">${leader.name}</h4>
+                                    <span class="text-[10px] text-orange-500 font-bold flex items-center gap-0.5 mt-0.5 animate-pulse">
+                                        <i data-lucide="activity" class="w-3 h-3"></i> Průběžně ${weekData.clients} klientů
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <span class="text-xs font-black text-orange-600 block">V banku</span>
+                                <span class="text-[8px] text-slate-400 font-bold uppercase tracking-wider block">1k Kč / 40 €</span>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    return `
+                        <!-- Zamčený týden -->
+                        <div class="bg-slate-50/30 border border-slate-100/60 rounded-2xl p-4 flex items-center gap-3 opacity-60">
+                            <div class="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center text-slate-400">
+                                <i data-lucide="lock" class="w-4 h-4"></i>
+                            </div>
+                            <div>
+                                <span class="text-[9px] text-slate-400 font-extrabold uppercase block">${weekData.week}. týden (${weekData.dateRange})</span>
+                                <h4 class="font-bold text-xs text-slate-400">Týden nezačal</h4>
+                            </div>
+                        </div>
+                    `;
+                }
+            }).join('');
+
+            renderMembersList();
+            lucide.createIcons();
+        }
+
+        // KONTROLA PINU PRO ADMINA
+        function checkAdminPin() {
+            const pin = document.getElementById('admin-pin-input').value;
+            if (pin === '9175') {
+                isAdmin = true;
+                showNotification('Administrační přístup odemčen.');
+                document.getElementById('admin-login-modal').classList.add('hidden');
+                document.getElementById('admin-active-bar').classList.remove('hidden');
+                
+                // Změna tlačítka v hlavičce
+                document.getElementById('admin-lock-icon').setAttribute('data-lucide', 'unlock');
+                document.getElementById('admin-lock-icon').className = 'w-3.5 h-3.5 text-emerald-400';
+                document.getElementById('admin-btn-text').innerText = 'Odhlásit se';
+                
+                lucide.createIcons();
+                openAdminPanel();
+            } else {
+                document.getElementById('admin-login-error').classList.remove('hidden');
+                showNotification('Nesprávný PIN!', 'error');
+            }
+        }
+
+        // ODHLÁŠENÍ ADMINA
+        function logoutAdmin() {
+            isAdmin = false;
+            document.getElementById('admin-active-bar').classList.add('hidden');
+            document.getElementById('admin-panel-modal').classList.add('hidden');
+            document.getElementById('admin-lock-icon').setAttribute('data-lucide', 'lock');
+            document.getElementById('admin-lock-icon').className = 'w-3.5 h-3.5 text-orange-400';
+            document.getElementById('admin-btn-text').innerText = 'Vstup pro Admina';
+            showNotification('Administrace byla uzavřena.');
+            lucide.createIcons();
+            renderDashboard();
+        }
+
+        // OTEVŘENÍ HLAVNÍHO ADMIN MODÁLU
+        function openAdminPanel() {
+            document.getElementById('admin-panel-modal').classList.remove('hidden');
+            document.getElementById('admin-current-month-label').innerText = currentMonth === 'july' ? 'Červenec' : 'Srpen';
+
+            const selectMerchant = document.getElementById('admin-merchant-select');
+            selectMerchant.innerHTML = salesTeam.map(m => `<option value="${m.id}">${m.name} [${m.currency}]</option>`).join('');
+            
+            const selectWeek = document.getElementById('admin-week-select');
+            selectWeek.innerHTML = weeklyWinners.map(w => `<option value="${w.week}">Týden ${w.week} (${w.dateRange})</option>`).join('');
+
+            if (salesTeam.length > 0) {
+                selectMerchant.value = salesTeam[0].id;
+                loadAdminMerchantData(salesTeam[0].id);
+            }
+            renderAdminWeeksPart();
+            lucide.createIcons();
+        }
+
+        function closeAdminPanel() {
+            document.getElementById('admin-panel-modal').classList.add('hidden');
+            renderDashboard();
+        }
+
+        // MODAL TOGGLE PRO LOGIN
+        function toggleAdminAuthModal() {
+            if (isAdmin) {
+                logoutAdmin();
+            } else {
+                document.getElementById('admin-login-modal').classList.remove('hidden');
+                document.getElementById('admin-pin-input').value = "";
+                document.getElementById('admin-login-error').classList.add('hidden');
+                document.getElementById('admin-pin-input').focus();
+            }
+        }
+
+        // ========================================================
+        //      RYCHLÉ A JEDNODUCHÉ UKLÁDÁNÍ DAT (ADMIN)
+        // ========================================================
+
+        // NAČTENÍ DAT OBCHODNÍKA DO RYCHLÉHO ADMIN FORMULÁŘE (Včetně měnového stavu)
+        function loadAdminMerchantData(merchantId) {
+            const m = salesTeam.find(x => x.id === merchantId);
+            if (!m) return;
+
+            const data = m[currentMonth];
+            document.getElementById('admin-opt-turnover').value = data.turnover;
+            document.getElementById('admin-opt-clients').value = data.newClients;
+
+            // Výběr odpovídajícího radio buttonu pro měnu
+            if (m.currency === "EUR") {
+                document.getElementById('admin-currency-eur').checked = true;
+            } else {
+                document.getElementById('admin-currency-czk').checked = true;
+            }
+
+            // Nastavení popisků formuláře podle zvolené měny
+            updateAdminLabels(m.currency);
+
+            // Nastavení limitů
+            document.getElementById('admin-opt-limit-bronz').value = data.limits.bronz;
+            document.getElementById('admin-opt-limit-zlato').value = data.limits.zlato;
+        }
+
+        // DYNAMICKÁ ZMĚNA LABELS A TLAČÍTEK V ADMINU PODLE MĚNY
+        function updateAdminLabels(currency) {
+            const symbol = currency === "EUR" ? "€" : "Kč";
+            document.getElementById('admin-label-turnover').innerText = `Aktuální obrat v tomto měsíci (${symbol})`;
+            document.getElementById('admin-label-bronz').innerText = `Limit Bronz (${symbol})`;
+            document.getElementById('admin-label-zlato').innerText = `Limit Zlato (${symbol})`;
+
+            // Rychlá přičítací tlačítka se přizpůsobí měně
+            const buttonsContainer = document.getElementById('admin-quick-turnover-buttons');
+            if (currency === "EUR") {
+                buttonsContainer.innerHTML = `
+                    <button onclick="addToAdminTurnover(500)" class="bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold px-3 py-2 rounded-xl text-xs transition-all">+ 500 €</button>
+                    <button onclick="addToAdminTurnover(2000)" class="bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold px-3 py-2 rounded-xl text-xs transition-all">+ 2k €</button>
+                `;
+            } else {
+                buttonsContainer.innerHTML = `
+                    <button onclick="addToAdminTurnover(10000)" class="bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold px-3 py-2 rounded-xl text-xs transition-all">+ 10k Kč</button>
+                    <button onclick="addToAdminTurnover(50000)" class="bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold px-3 py-2 rounded-xl text-xs transition-all">+ 50k Kč</button>
+                `;
+            }
+        }
+
+        // ZMĚNA MĚNY OBCHODNÍKA V ADMINU S AUTOMATICKÝM PŘEPOČTEM LIMITŮ (Zamezuje extrémním nesrovnalostem)
+        function changeAdminMerchantCurrency(currency) {
+            const merchantId = document.getElementById('admin-merchant-select').value;
+            const m = salesTeam.find(x => x.id === merchantId);
+            if (!m) return;
+
+            // Pokud došlo k reálné změně měny
+            if (m.currency !== currency) {
+                m.currency = currency;
+                
+                // Přepočet cílů na adekvátní měřítko nově zvolené měny
+                salesTeam.forEach(member => {
+                    if (member.id === m.id) {
+                        if (currency === "EUR") {
+                            member.july.limits = { bronz: 5000, stribro: 9000, zlato: 12000 };
+                            member.july.turnover = Math.round(member.july.turnover / 25);
+                            member.august.limits = { bronz: 6000, stribro: 10000, zlato: 14000 };
+                            member.august.turnover = Math.round(member.august.turnover / 25);
+                        } else {
+                            member.july.limits = { bronz: 120000, stribro: 200000, zlato: 280000 };
+                            member.july.turnover = member.july.turnover * 25;
+                            member.august.limits = { bronz: 130000, stribro: 215000, zlato: 300000 };
+                            member.august.turnover = member.august.turnover * 25;
+                        }
+                    }
+                });
+
+                showNotification(`Měna byla přepnuta na ${currency}. Letní limity a obrat byly adaptovány.`);
+                loadAdminMerchantData(m.id);
+            }
+        }
+
+        // POMOCNÁ RYCHLÁ TLAČÍTKA PRO PŘIČÍTÁNÍ
+        function addToAdminTurnover(val) {
+            const input = document.getElementById('admin-opt-turnover');
+            const currentVal = parseInt(input.value) || 0;
+            input.value = currentVal + val;
+        }
+
+        function adjustAdminClients(val) {
+            const input = document.getElementById('admin-opt-clients');
+            const currentVal = parseInt(input.value) || 0;
+            input.value = Math.max(0, currentVal + val);
+        }
+
+        // ZOBRAZENÍ / SKRYTÍ POKROČILÝCH LIMITŮ
+        function toggleAdvancedLimits() {
+            isAdvancedLimitsOpen = !isAdvancedLimitsOpen;
+            const section = document.getElementById('advanced-limits-section');
+            const icon = document.getElementById('adv-limits-icon');
+            
+            if (isAdvancedLimitsOpen) {
+                section.classList.remove('hidden');
+                icon.style.transform = 'rotate(180deg)';
+            } else {
+                section.classList.add('hidden');
+                icon.style.transform = 'rotate(0deg)';
+            }
+        }
+
+        // ULOŽENÍ HODNOT PRO OBCHODNÍKA
+        function saveAdminMerchantData() {
+            const merchantId = document.getElementById('admin-merchant-select').value;
+            const m = salesTeam.find(x => x.id === merchantId);
+            if (!m) return;
+
+            const data = m[currentMonth];
+            data.turnover = parseInt(document.getElementById('admin-opt-turnover').value) || 0;
+            data.newClients = parseInt(document.getElementById('admin-opt-clients').value) || 0;
+
+            // Pokročilé limity
+            const bronz = parseInt(document.getElementById('admin-opt-limit-bronz').value);
+            const zlato = parseInt(document.getElementById('admin-opt-limit-zlato').value);
+            data.limits.bronz = bronz;
+            data.limits.zlato = zlato;
+            data.limits.stribro = Math.round((bronz + zlato) / 2); // Automatické střední pásmo
+
+            showNotification(`Výsledky obchodníka ${m.name} byly uloženy.`);
+            renderDashboard();
+        }
+
+        // OTEVŘENÍ / ZAVŘENÍ MODALU NOVÉHO OBCHODNÍKA
+        function openAddMerchantModal() {
+            document.getElementById('add-merchant-form').reset();
+            // Nastavit výchozí měnu a hodnoty
+            handleAddMerchantCurrencyChange('CZK');
+            document.getElementById('add-merchant-modal').classList.remove('hidden');
+        }
+
+        function closeAddMerchantModal() {
+            document.getElementById('add-merchant-modal').classList.add('hidden');
+        }
+
+        // AUTO-PLNĚNÍ VÝCHOZÍCH LIMITŮ PODLE VOLBY MĚNY U NOVÉHO ČLENA
+        function handleAddMerchantCurrencyChange(currency) {
+            const lblBronzJuly = document.getElementById('add-label-july-bronz');
+            const lblZlatoJuly = document.getElementById('add-label-july-zlato');
+            const lblBronzAugust = document.getElementById('add-label-august-bronz');
+            const lblZlatoAugust = document.getElementById('add-label-august-zlato');
+            
+            const symbol = currency === "EUR" ? "(€)" : "(Kč)";
+            lblBronzJuly.innerText = `IP Bronz ${symbol}`;
+            lblZlatoJuly.innerText = `IP Zlato ${symbol}`;
+            lblBronzAugust.innerText = `IP Bronz ${symbol}`;
+            lblZlatoAugust.innerText = `IP Zlato ${symbol}`;
+
+            if (currency === "EUR") {
+                document.getElementById('add-july-bronz').value = 5000;
+                document.getElementById('add-july-zlato').value = 12000;
+                document.getElementById('add-august-bronz').value = 6000;
+                document.getElementById('add-august-zlato').value = 13000;
+            } else {
+                document.getElementById('add-july-bronz').value = 120000;
+                document.getElementById('add-july-zlato').value = 280000;
+                document.getElementById('add-august-bronz').value = 130000;
+                document.getElementById('add-august-zlato').value = 300000;
+            }
+        }
+
+        // VYTVOŘENÍ NOVÉHO OBCHODNÍKA
+        function createNewMerchant(event) {
+            event.preventDefault();
+
+            const name = document.getElementById('add-merchant-name').value;
+            let avatar = document.getElementById('add-merchant-avatar').value;
+            if (!avatar) {
+                avatar = "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=200";
+            }
+
+            const id = name.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+            const currency = document.querySelector('input[name="add-merchant-currency"]:checked').value;
+
+            const julyBronz = parseInt(document.getElementById('add-july-bronz').value);
+            const julyZlato = parseInt(document.getElementById('add-july-zlato').value);
+
+            const augustBronz = parseInt(document.getElementById('add-august-bronz').value);
+            const augustZlato = parseInt(document.getElementById('add-august-zlato').value);
+
+            const newMerchant = {
+                id: id,
+                name: name,
+                currency: currency,
+                avatar: avatar,
+                july: {
+                    turnover: 0,
+                    newClients: 0,
+                    limits: { bronz: julyBronz, stribro: Math.round((julyBronz + julyZlato)/2), zlato: julyZlato }
+                },
+                august: {
+                    turnover: 0,
+                    newClients: 0,
+                    limits: { bronz: augustBronz, stribro: Math.round((augustBronz + augustZlato)/2), zlato: augustZlato }
+                }
+            };
+
+            salesTeam.push(newMerchant);
+            closeAddMerchantModal();
+            showNotification(`Obchodník ${name} byl úspěšně přidán.`);
+            
+            selectedMerchantId = id;
+            
+            // Obnovit dropdown v adminu
+            const selectMerchant = document.getElementById('admin-merchant-select');
+            selectMerchant.innerHTML = salesTeam.map(m => `<option value="${m.id}">${m.name} [${m.currency}]</option>`).join('');
+            selectMerchant.value = id;
+            loadAdminMerchantData(id);
+
+            renderDashboard();
+        }
+
+        // SMAZÁNÍ AKTIVNĚ VYBRANÉHO ČLENA TÝMU
+        function deleteSelectedMerchant() {
+            const merchantId = document.getElementById('admin-merchant-select').value;
+            const m = salesTeam.find(x => x.id === merchantId);
+            if (!m) return;
+
+            document.getElementById('delete-merchant-name-label').innerText = m.name;
+            document.getElementById('delete-confirm-modal').classList.remove('hidden');
+
+            document.getElementById('delete-confirm-btn').onclick = function() {
+                salesTeam = salesTeam.filter(x => x.id !== merchantId);
+                if (selectedMerchantId === merchantId) {
+                    selectedMerchantId = salesTeam[0]?.id || null;
+                }
+                
+                showNotification(`Obchodník ${m.name} byl trvale odstraněn.`, 'error');
+                document.getElementById('delete-confirm-modal').classList.add('hidden');
+                
+                // Obnovení dropdownu
+                const selectMerchant = document.getElementById('admin-merchant-select');
+                selectMerchant.innerHTML = salesTeam.map(m => `<option value="${m.id}">${m.name} [${m.currency}]</option>`).join('');
+                if (salesTeam.length > 0) {
+                    selectMerchant.value = salesTeam[0].id;
+                    loadAdminMerchantData(salesTeam[0].id);
+                }
+                
+                renderDashboard();
+            };
+        }
+
+        // ZAVŘENÍ SMAZÁNÍ MODÁLU
+        function closeDeleteConfirmModal() {
+            document.getElementById('delete-confirm-modal').classList.add('hidden');
+        }
+
+        // RENDEROVÁNÍ DYNAMICKÉHO OBSAHU TÝDNŮ V ADMINU (S přizpůsobením měně vítěze)
+        function renderAdminWeeksPart() {
+            const weekNum = parseInt(document.getElementById('admin-week-select').value) || 1;
+            const w = weeklyWinners.find(x => x.week === weekNum);
+            if (!w) return;
+
+            const container = document.getElementById('admin-weeks-editor-container');
+            
+            // Najdeme měnu abychom správně zobrazili popisky tie-breakeru
+            const sampleUser = salesTeam.find(m => m.id === (w.winnerId || w.leadingId)) || salesTeam[0];
+            const symbol = sampleUser ? (sampleUser.currency === "EUR" ? "€" : "Kč") : "Kč";
+
+            container.innerHTML = `
+                <div class="bg-slate-50 border border-slate-100 rounded-3xl p-5 space-y-4 col-span-2">
+                    <div class="flex justify-between items-center pb-2 border-b border-slate-200">
+                        <span class="text-xs font-black text-slate-800">Týdenní status</span>
+                        <div class="flex items-center gap-1.5">
+                            <input type="checkbox" id="admin-complete-${w.week}" ${w.completed ? 'checked' : ''} 
+                                onchange="toggleWeekStatus(${w.week}, this.checked)" class="rounded text-orange-500 focus:ring-orange-500 w-4 h-4 cursor-pointer">
+                            <label class="text-[10px] font-black text-slate-500 cursor-pointer" for="admin-complete-${w.week}">TÝDEN JE VYHODNOCEN / UZAVŘEN</label>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs font-semibold">
+                        <div class="space-y-1">
+                            <label class="text-[9px] font-extrabold text-slate-400 uppercase tracking-wider block">${w.completed ? 'Vítěz týdne:' : 'Průběžný lídr:'}</label>
+                            <select id="admin-week-winner-field" onchange="changeWeekWinner(${w.week}, this.value)" class="w-full p-2.5 border border-slate-200 rounded-xl text-xs bg-white font-bold text-slate-800 focus:ring-2 focus:ring-orange-500/20">
+                                <option value="">-- Vyberte --</option>
+                                ${salesTeam.map(m => `<option value="${m.id}" ${(w.completed ? w.winnerId : w.leadingId) === m.id ? 'selected' : ''}>${m.name} [${m.currency}]</option>`).join('')}
+                            </select>
+                        </div>
+                        <div class="space-y-1">
+                            <label class="text-[9px] font-extrabold text-slate-400 uppercase tracking-wider block">Počet nově získaných klientů:</label>
+                            <input type="number" id="admin-week-clients-field" value="${w.clients || 0}" onchange="changeWeekField(${w.week}, 'clients', this.value)" class="w-full p-2.5 border border-slate-200 rounded-xl text-xs text-center font-black bg-white focus:ring-2 focus:ring-orange-500/20">
+                        </div>
+                        <div class="space-y-1">
+                            <label class="text-[9px] font-extrabold text-slate-400 uppercase tracking-wider block">Tie-breaker obrat ${symbol}:</label>
+                            <input type="number" id="admin-week-turnover-field" value="${w.tieBreakerTurnover || 0}" onchange="changeWeekField(${w.week}, 'tieBreakerTurnover', this.value)" class="w-full p-2.5 border border-slate-200 rounded-xl text-xs text-center font-black bg-white focus:ring-2 focus:ring-orange-500/20">
+                        </div>
+                    </div>
+
+                    <div class="pt-2 text-right">
+                        <button onclick="saveAdminWeekData(${w.week})" class="bg-emerald-500 hover:bg-emerald-600 text-white font-bold px-5 py-2.5 rounded-xl text-xs shadow-md shadow-emerald-500/10 transition-all">
+                            Uložit výsledky týdne ${w.week}
+                        </button>
+                    </div>
+                </div>
+            `;
+            lucide.createIcons();
+        }
+
+        // UKLÁDÁNÍ DAT PRO TÝDNY
+        function saveAdminWeekData(weekNum) {
+            const w = weeklyWinners.find(x => x.week === weekNum);
+            if (!w) return;
+
+            const selectedId = document.getElementById('admin-week-winner-field').value || null;
+            const clients = parseInt(document.getElementById('admin-week-clients-field').value) || 0;
+            const turnover = parseInt(document.getElementById('admin-week-turnover-field').value) || 0;
+
+            w.clients = clients;
+            w.tieBreakerTurnover = turnover;
+
+            if (w.completed) {
+                w.winnerId = selectedId;
+                w.leadingId = null;
+            } else {
+                w.leadingId = selectedId;
+                w.winnerId = null;
+            }
+
+            showNotification(`Výsledky pro týden ${weekNum} úspěšně uloženy.`);
+            renderDashboard();
+        }
+
+        function changeWeekField(weekNum, field, val) {
+            const w = weeklyWinners.find(x => x.week === weekNum);
+            if (!w) return;
+            w[field] = parseInt(val) || 0;
+            renderDashboard();
+        }
+
+        function changeWeekWinner(weekNum, selectedId) {
+            const w = weeklyWinners.find(x => x.week === weekNum);
+            if (!w) return;
+
+            const val = selectedId || null;
+            if (w.completed) {
+                w.winnerId = val;
+            } else {
+                w.leadingId = val;
+            }
+            // Znovu vykreslit formulář týdnů pro aktualizaci symbolu měny tie-breakeru
+            renderAdminWeeksPart();
+            renderDashboard();
+        }
+
+        function toggleWeekStatus(weekNum, isCompleted) {
+            const w = weeklyWinners.find(x => x.week === weekNum);
+            if (!w) return;
+
+            w.completed = isCompleted;
+            if (isCompleted) {
+                w.winnerId = w.leadingId || salesTeam[0]?.id || null;
+                w.leadingId = null;
+            } else {
+                w.leadingId = w.winnerId || salesTeam[0]?.id || null;
+                w.winnerId = null;
+            }
+
+            renderAdminWeeksPart();
+            renderDashboard();
+        }
+
+        // INICIALIZACE STRÁNKY
+        window.onload = function() {
+            renderDashboard();
+            selectMerchant(selectedMerchantId);
+        };
+    </script>
+</body>
+</html>
