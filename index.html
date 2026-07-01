@@ -604,7 +604,7 @@
                 };
 
                 // ADMIN - ZMĚNA MĚNY S PŘEPOČTEM VÝCHOZÍCH LIMITŮ
-                const changeAdminMerchantCurrency = (curr) => {
+                const handleAdminCurrencyChange = (curr) => {
                     setAdminRepCurrency(curr);
                     if (curr === 'EUR') {
                         setAdminRepBronz(5000);
@@ -699,18 +699,6 @@
                 return (
                     <div className="min-h-screen pb-24 font-sans bg-[#fbfaf8]">
                         
-                        {/* TOAST CONTAINER */}
-                        <div id="toast-container" className="fixed top-6 right-6 z-50 space-y-3 pointer-events-none">
-                            {toasts.map(t => (
-                                <div key={t.id} className={`p-4 rounded-2xl shadow-xl text-xs font-bold transition-all duration-300 pointer-events-auto flex items-center gap-2 border bg-white ${
-                                    t.type === 'success' ? 'border-emerald-100 text-emerald-800' : 'border-red-100 text-red-800'
-                                }`}>
-                                    <i className={`w-4 h-4 rounded-full ${t.type === 'success' ? 'bg-emerald-500' : 'bg-red-500'}`}></i>
-                                    <span>{t.message}</span>
-                                </div>
-                            ))}
-                        </div>
-
                         {/* HLAVNÍ HEADER S VOLBOU MĚSÍCE */}
                         <div className="bg-white border-b border-slate-100 py-4 px-6 relative overflow-hidden shadow-sm">
                             <div className="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-4 relative z-10">
@@ -884,7 +872,7 @@
                                                         <div>
                                                             <h4 className="font-extrabold text-xs text-slate-900 flex items-center gap-1">
                                                                 <span>{merchant.name}</span>
-                                                                <span className="text-[9px] px-1 bg-slate-100 rounded text-slate-500 uppercase font-black">{merchant.currency}</span>
+                                                                <span className="text-[9px] px-1 bg-white rounded border uppercase font-black">{merchant.currency}</span>
                                                             </h4>
                                                             <span className="text-[9px] font-bold text-slate-400">Akvizice: {data.newClients} nově</span>
                                                         </div>
@@ -1249,7 +1237,7 @@
                                     <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50">
                                         <div>
                                             <h2 className="text-lg font-extrabold text-slate-900 flex items-center gap-2">
-                                                <Icons.Settings /> Rychlá administrace
+                                                <Icons.Icons.Settings /> Rychlá administrace
                                             </h2>
                                             <p className="text-xs text-slate-500">
                                                 Upravujete výsledky pro měsíc: <strong className="text-orange-600 uppercase">{activeMonth === 'july' ? 'Červenec' : 'Srpen'}</strong>
@@ -1282,10 +1270,10 @@
                                                 <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Nastavení měny</label>
                                                 <div className="flex gap-2">
                                                     <label className="flex-1 p-2 bg-slate-50 border border-slate-200 rounded-xl flex items-center justify-center gap-1.5 cursor-pointer text-xs font-bold">
-                                                        <input type="radio" name="admin-opt-currency" value="CZK" id="admin-currency-czk" checked={adminRepCurrency === 'CZK'} onChange={() => changeAdminMerchantCurrency('CZK')} className="accent-orange-500" /> Kč (CZK)
+                                                        <input type="radio" name="admin-opt-currency" value="CZK" id="admin-currency-czk" checked={adminRepCurrency === 'CZK'} onChange={() => handleAdminCurrencyChange('CZK')} className="accent-orange-500" /> Kč (CZK)
                                                     </label>
                                                     <label className="flex-1 p-2 bg-slate-50 border border-slate-200 rounded-xl flex items-center justify-center gap-1.5 cursor-pointer text-xs font-bold">
-                                                        <input type="radio" name="admin-opt-currency" value="EUR" id="admin-currency-eur" checked={adminRepCurrency === 'EUR'} onChange={() => changeAdminMerchantCurrency('EUR')} className="accent-orange-500" /> € (EUR)
+                                                        <input type="radio" name="admin-opt-currency" value="EUR" id="admin-currency-eur" checked={adminRepCurrency === 'EUR'} onChange={() => handleAdminCurrencyChange('EUR')} className="accent-orange-500" /> € (EUR)
                                                     </label>
                                                 </div>
                                             </div>
@@ -1444,10 +1432,10 @@
                                                 <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Výchozí měna</label>
                                                 <div className="flex gap-2">
                                                     <label className="flex-1 p-2 bg-slate-50 border border-slate-200 rounded-xl flex items-center justify-center gap-1.5 cursor-pointer text-xs font-bold">
-                                                        <input type="radio" name="add-currency" value="CZK" checked={addMerchantCurrency === 'CZK'} onChange={() => handleAddMerchantCurrencyChange('CZK')} className="accent-orange-500" /> Kč (CZK)
+                                                        <input type="radio" name="add-merchant-currency" value="CZK" checked={addMerchantCurrency === 'CZK'} onChange={() => handleAddMerchantCurrencyChange('CZK')} className="accent-orange-500" /> Kč (CZK)
                                                     </label>
                                                     <label className="flex-1 p-2 bg-slate-50 border border-slate-200 rounded-xl flex items-center justify-center gap-1.5 cursor-pointer text-xs font-bold">
-                                                        <input type="radio" name="add-currency" value="EUR" checked={addMerchantCurrency === 'EUR'} onChange={() => handleAddMerchantCurrencyChange('EUR')} className="accent-orange-500" /> € (EUR)
+                                                        <input type="radio" name="add-merchant-currency" value="EUR" checked={addMerchantCurrency === 'EUR'} onChange={() => handleAddMerchantCurrencyChange('EUR')} className="accent-orange-500" /> € (EUR)
                                                     </label>
                                                 </div>
                                             </div>
