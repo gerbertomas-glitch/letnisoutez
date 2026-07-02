@@ -240,12 +240,26 @@
                 const [user, setUser] = useState(null);
                 const [isLoading, setIsLoading] = useState(true);
 
+                // DATUM A ČAS - Živá aktualizace
+                const [currentDateTime, setCurrentDateTime] = useState(new Date());
+
+                useEffect(() => {
+                    const timer = setInterval(() => {
+                        setCurrentDateTime(new Date());
+                    }, 1000);
+                    return () => clearInterval(timer);
+                }, []);
+
                 // DATA ZE SÍTĚ (Okamžitá inicializace výchozími daty pro zamezení prázdné stránky)
                 const [salesReps, setSalesReps] = useState(INITIAL_TEAM);
                 const [weeklyChallenges, setWeeklyWinners] = useState(INITIAL_WEEKS);
 
-                // LOKÁLNÍ STAVY A INTERAKTIVITA
-                const [activeMonth, setActiveMonth] = useState('july'); // 'july' / 'august'
+                // LOKÁLNÍ STAVY A INTERAKTIVITA - DYNAMICKÉ URČENÍ MĚSÍCE (Když nastane srpen, rovnou naskočí srpen)
+                const [activeMonth, setActiveMonth] = useState(() => {
+                    const month = new Date().getMonth(); // 0-11, 6 = červenec, 7 = srpen
+                    return month >= 7 ? 'august' : 'july';
+                });
+                
                 const [selectedRepId, setSelectedRepId] = useState('petra-svobodova');
                 const [simulatedTurnovers, setSimulatedTurnovers] = useState({}); // Přepsané obraty pro simulátor
                 const [toasts, setToasts] = useState([]);
@@ -605,7 +619,7 @@
                     if (!addName.trim()) return;
 
                     const newId = addName.toLowerCase().replace(/[^a-z0-9]+/g, '-');
-                    const finalAvatar = addAvatar.trim() || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=200";
+                    const finalAvatar = addAvatar.trim() || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=200";
 
                     const newRepObj = {
                         id: newId,
@@ -784,7 +798,7 @@
                             ))}
                         </div>
 
-                        {/* VYLEPŠENÝ PRÉMIOVÝ HEADER S BUBLINKAMI OBCHODNÍKŮ */}
+                        {/* VYLEPŠENÝ PRÉMIOVÝ HEADER S BUBLINKAMI OBCHODNÍKŮ S ŽIVÝM DATEM A ČASEM */}
                         <div className="bg-white/80 backdrop-blur-xl border-b border-orange-100/60 py-6 px-8 relative overflow-hidden shadow-md z-20">
                             <div className="absolute inset-0 bg-gradient-to-r from-orange-500/5 via-transparent to-yellow-500/5 pointer-events-none"></div>
                             <div className="max-w-7xl mx-auto flex flex-col lg:flex-row justify-between items-center gap-6 relative z-10">
@@ -830,8 +844,17 @@
                                     </div>
                                 </div>
                                 
-                                {/* PRAVÁ ČÁST: Termín soutěže, Stav cloudu & Volba měsíce */}
+                                {/* PRAVÁ ČÁST: Termín soutěže, Stav cloudu, ŽIVÉ DATUM A ČAS & Volba měsíce */}
                                 <div className="flex flex-wrap items-center justify-center lg:justify-end gap-4 w-full lg:w-auto">
+                                    
+                                    {/* Živý čas a datum (Nová úprava) */}
+                                    <div className="flex flex-col items-end hidden sm:flex">
+                                        <span className="text-xs font-bold text-slate-400">Aktuální čas</span>
+                                        <span className="text-sm font-black text-slate-700 bg-slate-50 px-3 py-1 rounded-xl border border-slate-150 flex items-center gap-1.5">
+                                            🕒 {currentDateTime.toLocaleDateString('cs-CZ', { day: 'numeric', month: 'numeric' })} &nbsp; {currentDateTime.toLocaleTimeString('cs-CZ', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                                        </span>
+                                    </div>
+
                                     <div className="flex flex-col items-end hidden sm:flex">
                                         <span className="text-xs font-bold text-slate-400">Trvání soutěže</span>
                                         <span className="text-sm font-black text-slate-700 bg-slate-50 px-3 py-1 rounded-xl border border-slate-150">1. 7. – 31. 8. 2026</span>
@@ -918,7 +941,7 @@
                                         onClick={() => selectMerchant(teamStats.topHunterRep.id)}
                                     />
                                 ) : (
-                                    <div className="w-14 h-14 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 shrink-0">🎯</div>
+                                    <div className="w-14 h-14 rounded-2xl bg-emerald-100 flex items-center justify-center text-emerald-600 shrink-0">🎯</div>
                                 )}
                                 <div>
                                     <span className="text-xs font-extrabold text-slate-400 uppercase tracking-wider block">Nejaktivnější lovec</span>
@@ -1016,7 +1039,7 @@
                                             <h2 className="text-lg font-black text-slate-900">Náš prodejní tým</h2>
                                             <p className="text-slate-400 text-xs mt-1">Výběrem zobrazíte detailní teploměr.</p>
                                         </div>
-                                        <span className="bg-slate-100 text-slate-600 text-xs font-bold px-2.5 py-1 rounded-full">{salesReps.length} lidí</span>
+                                        <span className="bg-slate-100 text-slate-700 text-xs font-black px-2.5 py-1.5 rounded-full border border-slate-200/50">{salesReps.length} lidí</span>
                                     </div>
 
                                     <div className="space-y-3 max-h-[520px] overflow-y-auto pr-1 no-scrollbar">
@@ -1407,7 +1430,7 @@
                                             return (
                                                 <div key={`w-winner-${weekData.week}`} className="bg-slate-50/80 border border-slate-100 rounded-3xl p-5 flex items-center justify-between gap-4 shadow-sm hover:scale-[1.01] transition-transform duration-300">
                                                     <div className="flex items-center gap-3.5">
-                                                        <img src={winner.avatar} alt={winner.name} className="w-12 h-12 rounded-full object-cover border-2 border-white shadow-sm" />
+                                                        <img src={winner.avatar} alt={winner.name} className="w-12 h-12 rounded-2xl object-cover border-2 border-white shadow-sm" />
                                                         <div>
                                                             <span className="text-[10px] text-slate-400 font-extrabold uppercase block tracking-wider">{weekData.week}. týden ({weekData.dateRange})</span>
                                                             <h4 className="font-extrabold text-sm text-slate-900 mt-0.5">{winner.name}</h4>
@@ -1428,7 +1451,7 @@
                                             return (
                                                 <div key={`w-leader-${weekData.week}`} className="bg-orange-50/30 border border-orange-100 rounded-3xl p-5 flex items-center justify-between gap-4 shadow-sm hover:scale-[1.01] transition-transform duration-300">
                                                     <div className="flex items-center gap-3.5">
-                                                        <img src={leader.avatar} alt={leader.name} className="w-12 h-12 rounded-full object-cover border-2 border-white shadow-sm" />
+                                                        <img src={leader.avatar} alt={leader.name} className="w-12 h-12 rounded-2xl object-cover border-2 border-white shadow-sm" />
                                                         <div>
                                                             <span className="text-[10px] text-orange-600 font-extrabold uppercase block tracking-wider">{weekData.week}. týden ({weekData.dateRange})</span>
                                                             <h4 className="font-extrabold text-sm text-slate-900 mt-0.5">{leader.name}</h4>
@@ -1523,14 +1546,14 @@
                                                 <button 
                                                     type="button"
                                                     onClick={() => setActiveMonth('july')} 
-                                                    className={`px-5 py-1.5 rounded-lg text-xs font-black transition-all ${activeMonth === 'july' ? 'bg-white text-orange-600 shadow-sm scale-102' : 'text-slate-500 hover:text-slate-800'}`}
+                                                    className={`px-5 py-1.5 rounded-lg text-xs font-black transition-all ${activeMonth === 'july' ? 'bg-white text-orange-600 shadow-sm' : 'text-slate-500'}`}
                                                 >
                                                     Červenec
                                                 </button>
                                                 <button 
                                                     type="button"
                                                     onClick={() => setActiveMonth('august')} 
-                                                    className={`px-5 py-1.5 rounded-lg text-xs font-black transition-all ${activeMonth === 'august' ? 'bg-white text-orange-600 shadow-sm scale-102' : 'text-slate-500 hover:text-slate-800'}`}
+                                                    className={`px-5 py-1.5 rounded-lg text-xs font-black transition-all ${activeMonth === 'august' ? 'bg-white text-orange-600 shadow-sm' : 'text-slate-500'}`}
                                                 >
                                                     Srpen
                                                 </button>
@@ -1545,7 +1568,7 @@
                                                 <button 
                                                     type="button"
                                                     onClick={() => setAdminRepTab('edit')} 
-                                                    className={`flex-1 py-2.5 rounded-xl text-xs font-black transition-all uppercase tracking-wider ${adminTab === 'edit' ? 'bg-white text-orange-600 shadow-sm font-black scale-102' : 'text-slate-500 hover:text-slate-800'}`}
+                                                    className={`flex-1 py-2.5 rounded-xl text-xs font-black transition-all uppercase tracking-wider ${adminTab === 'edit' ? 'bg-white text-orange-600 shadow-sm scale-102' : 'text-slate-500 hover:text-slate-800'}`}
                                                     disabled={salesReps.length === 0}
                                                 >
                                                     ✏️ Úprava / Smazání
@@ -1553,7 +1576,7 @@
                                                 <button 
                                                     type="button"
                                                     onClick={() => setAdminRepTab('add')} 
-                                                    className={`flex-1 py-2.5 rounded-xl text-xs font-black transition-all uppercase tracking-wider ${adminTab === 'add' ? 'bg-white text-orange-600 shadow-sm font-black scale-102' : 'text-slate-500 hover:text-slate-800'}`}
+                                                    className={`flex-1 py-2.5 rounded-xl text-xs font-black transition-all uppercase tracking-wider ${adminTab === 'add' ? 'bg-white text-orange-600 shadow-sm scale-102' : 'text-slate-500 hover:text-slate-800'}`}
                                                 >
                                                     ➕ Přidat nového
                                                 </button>
