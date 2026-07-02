@@ -23,7 +23,7 @@
 
         /* Vizuální hloubka a stíny */
         .premium-shadow {
-            box-shadow: 0 12px 40px -12px rgba(148, 163, 184, 0.18), 0 2px 8px -1px rgba(148, 163, 184, 0.06);
+            box-shadow: 0 12px 40px -12px rgba(148, 163, 184, 0.18), 0 2px 8px -1px rgba(148, 163, 184, 0.05);
         }
         .premium-shadow-hover {
             transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
@@ -256,7 +256,7 @@
 
                 // LOKÁLNÍ STAVY A INTERAKTIVITA - DYNAMICKÉ URČENÍ MĚSÍCE (Když nastane srpen, rovnou naskočí srpen)
                 const [activeMonth, setActiveMonth] = useState(() => {
-                    const month = new Date().getMonth(); // 0-11, 6 = červenec, 7 = srpen
+                    const month = new Date().getMonth(); // 0-11, 6 = Červenec, 7 = Srpen
                     return month >= 7 ? 'august' : 'july';
                 });
                 
@@ -847,7 +847,7 @@
                                 {/* PRAVÁ ČÁST: Termín soutěže, Stav cloudu, ŽIVÉ DATUM A ČAS & Volba měsíce */}
                                 <div className="flex flex-wrap items-center justify-center lg:justify-end gap-4 w-full lg:w-auto">
                                     
-                                    {/* Živý čas a datum (Nová úprava) */}
+                                    {/* Živý čas a datum */}
                                     <div className="flex flex-col items-end hidden sm:flex">
                                         <span className="text-xs font-bold text-slate-400">Aktuální čas</span>
                                         <span className="text-sm font-black text-slate-700 bg-slate-50 px-3 py-1 rounded-xl border border-slate-150 flex items-center gap-1.5">
@@ -883,31 +883,36 @@
                             </div>
                         </div>
 
-                        {/* HLAVNÍ DASHBOARD STATS S PROFILY OBCHODNÍKŮ MÍSTO IKONEK */}
-                        <div className="max-w-7xl mx-auto px-6 lg:px-12 mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 relative z-10">
+                        {/* HLAVNÍ DASHBOARD STATS - PRÉMIOVÝ CELOPLOŠNÝ OBRAZ TÝMU NAHOŘE A 3 KARTY POD NÍM VPRAVO/VEDLE SEBE */}
+                        <div className="max-w-7xl mx-auto px-6 lg:px-12 mt-10 grid grid-cols-1 md:grid-cols-6 gap-6 relative z-10">
                             
-                            {/* Karta: Obrat týmu */}
-                            <div className="bg-white border border-slate-100 p-6 rounded-[32px] flex items-center gap-5 premium-shadow hover:scale-[1.02] transition-transform duration-300 relative overflow-hidden group">
-                                <div className="absolute right-[-20px] bottom-[-20px] w-24 h-24 bg-orange-500/5 rounded-full blur-xl group-hover:bg-orange-500/10 transition-all duration-500"></div>
-                                <div className="flex -space-x-3 overflow-hidden shrink-0">
-                                    {salesReps.slice(0, 3).map(rep => (
-                                        <img 
-                                            key={rep.id} 
-                                            className="inline-block h-12 w-12 rounded-full ring-2 ring-white object-cover shadow-md" 
-                                            src={rep.avatar} 
-                                            alt={rep.name} 
-                                        />
-                                    ))}
+                            {/* Karta 1: Celkový obrat týmu (Zvětšeno na celou šířku lg:col-span-6 a md:col-span-6 navrch!) */}
+                            <div className="bg-white border border-slate-100 p-8 rounded-[32px] flex flex-col sm:flex-row sm:items-center justify-between gap-6 premium-shadow hover:scale-[1.01] transition-transform duration-300 relative overflow-hidden group col-span-1 md:col-span-6">
+                                <div className="absolute right-[-20px] bottom-[-20px] w-36 h-32 bg-orange-500/5 rounded-full blur-xl group-hover:bg-orange-500/10 transition-all duration-500"></div>
+                                <div className="flex items-center gap-5">
+                                    <div className="flex -space-x-3 overflow-hidden shrink-0">
+                                        {salesReps.slice(0, 4).map(rep => (
+                                            <img 
+                                                key={rep.id} 
+                                                className="inline-block h-14 w-14 rounded-full ring-4 ring-white object-cover shadow-lg hover:scale-105 transition-transform duration-300" 
+                                                src={rep.avatar} 
+                                                alt={rep.name} 
+                                            />
+                                        ))}
+                                    </div>
+                                    <div>
+                                        <span className="text-sm font-extrabold text-slate-400 uppercase tracking-wider block">Celkový obrat celého týmu</span>
+                                        <span className="text-xs text-slate-400 font-medium">Společný letní výkon našich obchodníků</span>
+                                    </div>
                                 </div>
-                                <div>
-                                    <span className="text-xs font-extrabold text-slate-400 uppercase tracking-wider block">Obrat týmu</span>
-                                    <h3 className="text-2xl font-black text-slate-900 mt-0.5 bg-gradient-to-r from-slate-950 to-orange-900 bg-clip-text text-transparent">{formatMoney(teamStats.totalCZK, 'CZK')}</h3>
-                                    <span className="text-xs text-slate-400 font-extrabold block mt-0.5">≈ {formatMoney(teamStats.totalEUR, 'EUR')}</span>
+                                <div className="text-left sm:text-right z-10 leading-tight">
+                                    <h3 className="text-3xl sm:text-4xl font-black text-slate-900 bg-gradient-to-r from-slate-950 to-orange-950 bg-clip-text text-transparent leading-none">{formatMoney(teamStats.totalCZK, 'CZK')}</h3>
+                                    <span className="text-sm text-slate-400 font-extrabold block mt-2">≈ {formatMoney(teamStats.totalEUR, 'EUR')}</span>
                                 </div>
                             </div>
 
-                            {/* Karta: Nejvyšší provize */}
-                            <div className="bg-white border border-slate-100 p-6 rounded-[32px] flex items-center gap-5 premium-shadow hover:scale-[1.02] transition-transform duration-300 relative overflow-hidden group">
+                            {/* Karta 2: Nejvyšší provize (Pod celkovým obratem, šířka 1/3) */}
+                            <div className="bg-white border border-slate-100 p-6 rounded-[32px] flex items-center gap-5 premium-shadow hover:scale-[1.02] transition-transform duration-300 relative overflow-hidden group col-span-1 md:col-span-2">
                                 <div className="absolute right-[-20px] bottom-[-20px] w-24 h-24 bg-yellow-500/5 rounded-full blur-xl group-hover:bg-yellow-500/10 transition-all duration-500"></div>
                                 {teamStats.topCommRep ? (
                                     <img 
@@ -922,15 +927,15 @@
                                 )}
                                 <div>
                                     <span className="text-xs font-extrabold text-slate-400 uppercase tracking-wider block">Nejvyšší provize</span>
-                                    <h3 className="text-xl font-black text-slate-900 mt-0.5 truncate max-w-[160px]">{teamStats.topCommRep ? teamStats.topCommRep.name : '--'}</h3>
+                                    <h3 className="text-base font-black text-slate-900 mt-0.5 truncate max-w-[150px]">{teamStats.topCommRep ? teamStats.topCommRep.name : '--'}</h3>
                                     <span className="text-xs text-amber-600 font-black block mt-0.5">
-                                        {teamStats.topCommRep ? `${formatMerchantMoney(teamStats.topCommRep.amountNative, teamStats.topCommRep.currency)} (${teamStats.topCommRep.rate}%)` : '--'}
+                                        {teamStats.topCommRep ? `${formatMerchantMoney(teamStats.topCommRep.amountNative, teamStats.topCommRep.currency)}` : '--'}
                                     </span>
                                 </div>
                             </div>
 
-                            {/* Karta: Nejaktivnější lovec */}
-                            <div className="bg-white border border-slate-100 p-6 rounded-[32px] flex items-center gap-5 premium-shadow hover:scale-[1.02] transition-transform duration-300 relative overflow-hidden group">
+                            {/* Karta 3: Nejaktivnější lovec (Pod celkovým obratem, šířka 1/3) */}
+                            <div className="bg-white border border-slate-100 p-6 rounded-[32px] flex items-center gap-5 premium-shadow hover:scale-[1.02] transition-transform duration-300 relative overflow-hidden group col-span-1 md:col-span-2">
                                 <div className="absolute right-[-20px] bottom-[-20px] w-24 h-24 bg-emerald-500/5 rounded-full blur-xl group-hover:bg-emerald-500/10 transition-all duration-500"></div>
                                 {teamStats.topHunterRep ? (
                                     <img 
@@ -941,19 +946,19 @@
                                         onClick={() => selectMerchant(teamStats.topHunterRep.id)}
                                     />
                                 ) : (
-                                    <div className="w-14 h-14 rounded-2xl bg-emerald-100 flex items-center justify-center text-emerald-600 shrink-0">🎯</div>
+                                    <div className="w-14 h-14 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 shrink-0">🎯</div>
                                 )}
                                 <div>
                                     <span className="text-xs font-extrabold text-slate-400 uppercase tracking-wider block">Nejaktivnější lovec</span>
-                                    <h3 className="text-xl font-black text-slate-900 mt-0.5 truncate max-w-[160px]">{teamStats.topHunterRep ? teamStats.topHunterRep.name : '--'}</h3>
+                                    <h3 className="text-base font-black text-slate-900 mt-0.5 truncate max-w-[150px]">{teamStats.topHunterRep ? teamStats.topHunterRep.name : '--'}</h3>
                                     <span className="text-xs text-emerald-600 font-black block mt-0.5">
-                                        {teamStats.topHunterValue > 0 ? `${teamStats.topHunterValue} nových klientů` : '0 akvizic'}
+                                        {teamStats.topHunterValue > 0 ? `${teamStats.topHunterValue} akvizic` : '0 akvizic'}
                                     </span>
                                 </div>
                             </div>
 
-                            {/* Karta: Průměrná provize */}
-                            <div className="bg-white border border-slate-100 p-6 rounded-[32px] flex items-center gap-5 premium-shadow hover:scale-[1.02] transition-transform duration-300 relative overflow-hidden group">
+                            {/* Karta 4: Průměrná provize (Pod celkovým obratem, šířka 1/3) */}
+                            <div className="bg-white border border-slate-100 p-6 rounded-[32px] flex items-center gap-5 premium-shadow hover:scale-[1.02] transition-transform duration-300 relative overflow-hidden group col-span-1 md:col-span-2">
                                 <div className="absolute right-[-20px] bottom-[-20px] w-24 h-24 bg-purple-500/5 rounded-full blur-xl group-hover:bg-purple-500/10 transition-all duration-500"></div>
                                 <div className="flex -space-x-3 overflow-hidden shrink-0">
                                     {salesReps.slice(1, 4).map(rep => (
@@ -967,8 +972,8 @@
                                 </div>
                                 <div>
                                     <span className="text-xs font-extrabold text-slate-400 uppercase tracking-wider block">Průměrná provize</span>
-                                    <h3 className="text-2xl font-black text-slate-900 mt-0.5">{teamStats.avgComm} %</h3>
-                                    <span className="text-xs text-purple-600 font-extrabold block mt-0.5">Každý má min. 20% základ</span>
+                                    <h3 className="text-xl font-black text-slate-900 mt-0.5">{teamStats.avgComm} %</h3>
+                                    <span className="text-xs text-purple-600 font-extrabold block mt-0.5">Základ: min. 20%</span>
                                 </div>
                             </div>
                         </div>
@@ -1430,7 +1435,7 @@
                                             return (
                                                 <div key={`w-winner-${weekData.week}`} className="bg-slate-50/80 border border-slate-100 rounded-3xl p-5 flex items-center justify-between gap-4 shadow-sm hover:scale-[1.01] transition-transform duration-300">
                                                     <div className="flex items-center gap-3.5">
-                                                        <img src={winner.avatar} alt={winner.name} className="w-12 h-12 rounded-2xl object-cover border-2 border-white shadow-sm" />
+                                                        <img src={winner.avatar} alt={winner.name} className="w-12 h-12 rounded-full object-cover border-2 border-white shadow-sm" />
                                                         <div>
                                                             <span className="text-[10px] text-slate-400 font-extrabold uppercase block tracking-wider">{weekData.week}. týden ({weekData.dateRange})</span>
                                                             <h4 className="font-extrabold text-sm text-slate-900 mt-0.5">{winner.name}</h4>
@@ -1451,7 +1456,7 @@
                                             return (
                                                 <div key={`w-leader-${weekData.week}`} className="bg-orange-50/30 border border-orange-100 rounded-3xl p-5 flex items-center justify-between gap-4 shadow-sm hover:scale-[1.01] transition-transform duration-300">
                                                     <div className="flex items-center gap-3.5">
-                                                        <img src={leader.avatar} alt={leader.name} className="w-12 h-12 rounded-2xl object-cover border-2 border-white shadow-sm" />
+                                                        <img src={leader.avatar} alt={leader.name} className="w-12 h-12 rounded-full object-cover border-2 border-white shadow-sm" />
                                                         <div>
                                                             <span className="text-[10px] text-orange-600 font-extrabold uppercase block tracking-wider">{weekData.week}. týden ({weekData.dateRange})</span>
                                                             <h4 className="font-extrabold text-sm text-slate-900 mt-0.5">{leader.name}</h4>
@@ -1764,7 +1769,7 @@
                                                     </div>
 
                                                     <div className="p-4 bg-orange-50/40 border border-orange-100 rounded-2xl space-y-3 shadow-inner">
-                                                        <h4 className="text-xs font-black text-orange-800 uppercase tracking-wider">Cílové limity: Červenec</h4>
+                                                        <h4 className="text-xs font-extrabold text-orange-800 uppercase tracking-wider">Cílové limity: Červenec</h4>
                                                         <div className="grid grid-cols-2 gap-3">
                                                             <div className="space-y-1.5">
                                                                 <label className="text-[10px] font-bold text-slate-500">Limit Bronz</label>
@@ -1778,7 +1783,7 @@
                                                     </div>
 
                                                     <div className="p-4 bg-slate-50 border border-slate-100 rounded-2xl space-y-3 shadow-inner">
-                                                        <h4 className="text-xs font-black text-slate-800 uppercase tracking-wider">Cílové limity: Srpen</h4>
+                                                        <h4 className="text-xs font-extrabold text-slate-800 uppercase tracking-wider">Cílové limity: Srpen</h4>
                                                         <div className="grid grid-cols-2 gap-3">
                                                             <div className="space-y-1.5">
                                                                 <label className="text-[10px] font-bold text-slate-500">Limit Bronz</label>
@@ -1899,7 +1904,7 @@
         if (window.FirebaseServices) {
             renderApp();
         } else {
-            window.addEventListener('firebaseReady', renderApp);
+            window.addEventListener('firebaseReady', () => renderApp());
         }
     </script>
 </body>
