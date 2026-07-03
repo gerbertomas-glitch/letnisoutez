@@ -162,7 +162,8 @@ function applyRemoteData(data){
   if(data.settings) state.settings = Object.assign(defaultSettings(), data.settings);
   state.reps.forEach(ensureDeals);
   if(!state.selectedRepId || !repById(state.selectedRepId)){
-    state.selectedRepId = state.reps[0] ? state.reps[0].id : null;
+    const myId = getMyRepId();
+    state.selectedRepId = (myId && repById(myId)) ? myId : null;
   }
   localBackupSave();
 }
@@ -182,7 +183,8 @@ async function loadData(){
   state.settings = defaultSettings();
   localBackupLoad();
   state.reps.forEach(ensureDeals);
-  state.selectedRepId = state.reps[0] ? state.reps[0].id : null;
+  const myId = getMyRepId();
+  state.selectedRepId = (myId && repById(myId)) ? myId : null;
   state.loading = false;
 
   FB = await waitForFirebase(6000);
@@ -297,6 +299,11 @@ function dealTimeText(ts){
 }
 
 function repById(id){ return state.reps.find(r=>r.id===id); }
+
+/* ============ MOJE KARTA: každý obchodník si na svém zařízení zvolí sám sebe ============ */
+const MY_REP_KEY = 'sb2026-my-rep';
+function getMyRepId(){ try{ return localStorage.getItem(MY_REP_KEY); }catch(e){ return null; } }
+function setMyRepId(id){ try{ localStorage.setItem(MY_REP_KEY, id); }catch(e){} }
 
 /* ============ AVATARY: výchozí fotka + čištění vloženého odkazu ============ */
 const DEFAULT_AVATAR = 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=200';
@@ -664,7 +671,25 @@ function repsListHTML(){
 
 function detailHTML(){
   const rep = repById(state.selectedRepId);
-  if(!rep) return `<div class="text-center py-24 text-slate-400 font-medium">Žádný aktivní obchodník v týmu. Přidejte nového v administraci.</div>`;
+  if(!rep){
+    if(!state.reps.length) return `<div class="text-center py-24 text-slate-400 font-medium">Žádný aktivní obchodník v týmu. Přidejte nového v administraci.</div>`;
+    return `
+    <div class="py-10 text-center space-y-8">
+      <div>
+        <div class="text-4xl mb-3">👋</div>
+        <h3 class="text-2xl font-black text-slate-900">Kdo jste?</h3>
+        <p class="text-sm text-slate-400 font-semibold mt-2">Vyberte svou kartu — dashboard si vás zapamatuje<br>a příště vám rovnou ukáže váš rozpis.</p>
+      </div>
+      <div class="grid grid-cols-2 sm:grid-cols-3 gap-4 max-w-lg mx-auto">
+        ${state.reps.map(r=>`
+        <button data-action="choose-me" data-id="${r.id}" class="bg-slate-50 hover:bg-orange-50 border-2 border-slate-100 hover:border-orange-300 rounded-3xl p-5 flex flex-col items-center gap-3 transition-all hover:scale-[1.03] shadow-sm">
+          <img src="${avatarSrc(r)}" ${AVATAR_FALLBACK} alt="${escapeHtml(r.name)}" class="w-16 h-16 rounded-full object-cover ring-4 ring-white shadow-md">
+          <span class="text-sm font-extrabold text-slate-800 leading-tight">${escapeHtml(r.name)}</span>
+        </button>`).join('')}
+      </div>
+      <p class="text-[11px] text-slate-400 font-semibold">Na kolegy se pak můžete kdykoli podívat kliknutím v seznamu vlevo.</p>
+    </div>`;
+  }
   const d = monthData(rep, state.activeMonth);
   const realTurnover = d.turnover;
   const turnover = state.simTurnovers[rep.id] !== undefined ? state.simTurnovers[rep.id] : realTurnover;
@@ -711,7 +736,12 @@ function detailHTML(){
         <img src="${avatarSrc(rep)}" ${AVATAR_FALLBACK} alt="${escapeHtml(rep.name)}" class="w-16 h-16 rounded-full object-cover ring-4 ring-slate-100 shadow-sm">
         <div>
           <h3 class="text-2xl font-black text-slate-900 leading-tight">${escapeHtml(rep.name)}</h3>
-          <span class="inline-block text-[11px] px-3.5 py-1 rounded-full font-black border mt-1.5 shadow-sm ${t.badge}">${t.label}</span>
+          <div class="flex flex-wrap items-center gap-2 mt-1.5">
+            <span class="inline-block text-[11px] px-3.5 py-1 rounded-full font-black border shadow-sm ${t.badge}">${t.label}</span>
+            ${getMyRepId() === rep.id
+              ? `<span class="inline-block text-[11px] px-3 py-1 rounded-full font-black bg-orange-500 text-white shadow-sm">⭐ Moje karta</span>`
+              : `<button data-action="choose-me" data-id="${rep.id}" class="inline-block text-[11px] px-3 py-1 rounded-full font-black bg-white border border-orange-200 text-orange-600 hover:bg-orange-50 shadow-sm transition-colors">☆ Nastavit jako moji kartu</button>`}
+          </div>
         </div>
       </div>
       <div class="text-right">
@@ -1169,6 +1199,14 @@ function bindGlobalEvents(){
     else if(action==='close-pin'){ state.showPinModal=false; render(); }
     else if(action==='dismiss-toast'){ state.toasts = state.toasts.filter(t=>t.id!==el.dataset.id); renderToasts(); }
     else if(action==='select-rep'){ state.selectedRepId = el.dataset.id; render(); }
+    else if(action==='choose-me'){
+      const rep = repById(el.dataset.id);
+      if(!rep) return;
+      setMyRepId(rep.id);
+      state.selectedRepId = rep.id;
+      render();
+      addToast(`Uloženo — dashboard vám teď bude vždy ukazovat kartu: ${rep.name}.`);
+    }
     else if(action==='set-month'){ state.activeMonth = el.dataset.month; userPickedMonth = true; render(); }
     else if(action==='reset-sim'){ delete state.simTurnovers[state.selectedRepId]; render(); }
     else if(action==='admin-close'){ await persist(true); state.isAdmin=false; state.showResetConfirm=false; render(); addToast('Administrace uzavřena, změny uloženy.'); }
