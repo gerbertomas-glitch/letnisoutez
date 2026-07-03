@@ -23,6 +23,35 @@ input[type=range]::-webkit-slider-thumb{box-shadow:0 4px 10px rgba(249,115,22,.4
 <body class="antialiased">
 <div id="app"></div>
 
+<!-- FIREBASE (sdílená databáze pro celý tým) -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+  import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+  import { getFirestore, doc, onSnapshot, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyANCEwT20Z4-j-J3UHnY8YpRyAl6f7Nj3Y",
+    authDomain: "soutez-141086.firebaseapp.com",
+    projectId: "soutez-141086",
+    storageBucket: "soutez-141086.firebasestorage.app",
+    messagingSenderId: "1024208635457",
+    appId: "1:1024208635457:web:3b976a8d7a91d8420ee8c0",
+    measurementId: "G-CVTDFBCFZ5"
+  };
+  const appId = 'view-cz-letni-sales-booster-2026';
+
+  try{
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    window.FirebaseServices = { auth, db, doc, onSnapshot, setDoc, signInAnonymously, onAuthStateChanged, appId };
+  }catch(e){
+    console.error('Firebase init selhal:', e);
+    window.FirebaseServices = null;
+  }
+  window.dispatchEvent(new Event('firebaseReady'));
+</script>
+
 <script>
 /* ============ DATA & STATE ============
    Model provizí: KAŽDÝ obchodník má základ 20 % ze svého obratu.
@@ -102,63 +131,118 @@ function addToast(message, type){
   setTimeout(()=>{ state.toasts = state.toasts.filter(t=>t.id!==id); renderToasts(); }, 3500);
 }
 
-/* ============ STORAGE (cloud + lokální záloha) ============ */
-async function storageGet(key){
+/* ============ STORAGE: FIREBASE FIRESTORE (sdílené pro celý tým) + lokální záloha ============ */
+let FB = null;          // Firebase služby
+let fbDocRef = null;    // odkaz na sdílený dokument
+let fbUnsub = null;     // odhlášení real-time posluchače
+let lastLocalWrite = 0; // ochrana proti přepsání vlastních čerstvých změn
+
+function localBackupSave(){
   try{
-    if(window.storage){
-      const r = await window.storage.get(key, true);
-      if(r && r.value) return r.value;
-    }
-  }catch(e){ /* klíč neexistuje nebo cloud nedostupný */ }
-  try{ return localStorage.getItem(key); }catch(e){ return null; }
+    localStorage.setItem(STORAGE_KEY_REPS, JSON.stringify(state.reps));
+    localStorage.setItem(STORAGE_KEY_WEEKS, JSON.stringify(state.weeks));
+    localStorage.setItem(STORAGE_KEY_SETTINGS, JSON.stringify(state.settings));
+  }catch(e){}
 }
-async function storageSet(key, val){
-  let ok = false;
+function localBackupLoad(){
   try{
-    if(window.storage){
-      const r = await window.storage.set(key, val, true);
-      if(r) ok = true;
-    }
-  }catch(e){ /* cloud selhal, zkusíme lokální zálohu */ }
-  try{ localStorage.setItem(key, val); ok = true; }catch(e){}
-  return ok;
+    const r = localStorage.getItem(STORAGE_KEY_REPS);
+    const w = localStorage.getItem(STORAGE_KEY_WEEKS);
+    const st = localStorage.getItem(STORAGE_KEY_SETTINGS);
+    if(r) state.reps = JSON.parse(r);
+    if(w) state.weeks = JSON.parse(w);
+    if(st) state.settings = Object.assign(defaultSettings(), JSON.parse(st));
+  }catch(e){}
+}
+
+function applyRemoteData(data){
+  if(!data) return;
+  if(Array.isArray(data.reps)) state.reps = data.reps;
+  if(Array.isArray(data.weeks)) state.weeks = data.weeks;
+  if(data.settings) state.settings = Object.assign(defaultSettings(), data.settings);
+  if(!state.selectedRepId || !repById(state.selectedRepId)){
+    state.selectedRepId = state.reps[0] ? state.reps[0].id : null;
+  }
+  localBackupSave();
+}
+
+function waitForFirebase(timeoutMs){
+  return new Promise(resolve => {
+    if('FirebaseServices' in window) return resolve(window.FirebaseServices);
+    const timer = setTimeout(()=> resolve(window.FirebaseServices || null), timeoutMs);
+    window.addEventListener('firebaseReady', ()=>{ clearTimeout(timer); resolve(window.FirebaseServices || null); }, { once:true });
+  });
 }
 
 async function loadData(){
-  try{
-    const r = await storageGet(STORAGE_KEY_REPS);
-    state.reps = r ? JSON.parse(r) : defaultReps();
-  }catch(e){ state.reps = defaultReps(); }
-  try{
-    const w = await storageGet(STORAGE_KEY_WEEKS);
-    state.weeks = w ? JSON.parse(w) : defaultWeeks();
-  }catch(e){ state.weeks = defaultWeeks(); }
-  try{
-    const st = await storageGet(STORAGE_KEY_SETTINGS);
-    state.settings = st ? Object.assign(defaultSettings(), JSON.parse(st)) : defaultSettings();
-  }catch(e){ state.settings = defaultSettings(); }
-
-  if(!state.reps.length){ state.reps = defaultReps(); }
-  if(!state.weeks.length){ state.weeks = defaultWeeks(); }
+  // výchozí data + případná lokální záloha (pro okamžité zobrazení)
+  state.reps = defaultReps();
+  state.weeks = defaultWeeks();
+  state.settings = defaultSettings();
+  localBackupLoad();
   state.selectedRepId = state.reps[0] ? state.reps[0].id : null;
   state.loading = false;
 
-  const ok1 = await storageSet(STORAGE_KEY_REPS, JSON.stringify(state.reps));
-  const ok2 = await storageSet(STORAGE_KEY_WEEKS, JSON.stringify(state.weeks));
-  const ok3 = await storageSet(STORAGE_KEY_SETTINGS, JSON.stringify(state.settings));
-  state.cloudOk = ok1 && ok2 && ok3;
+  FB = await waitForFirebase(6000);
+  if(!FB){
+    state.cloudOk = false;
+    addToast('Databáze není dostupná — běžíme v lokálním režimu.', 'error');
+    return;
+  }
+
+  try{
+    await FB.signInAnonymously(FB.auth);
+    fbDocRef = FB.doc(FB.db, 'artifacts', FB.appId, 'public', 'data', 'sales_booster_2026', 'main');
+
+    // Real-time synchronizace: každá uložená změna se okamžitě propíše všem otevřeným obrazovkám
+    fbUnsub = FB.onSnapshot(fbDocRef, (snap) => {
+      state.cloudOk = true;
+      if(snap.exists()){
+        // Nepřepisovat data, když admin právě edituje, nebo těsně po vlastním uložení
+        const editing = state.isAdmin || state.showPinModal;
+        const justWrote = (Date.now() - lastLocalWrite) < 1500;
+        if(!editing && !justWrote){
+          applyRemoteData(snap.data());
+          render();
+        } else if(!editing){
+          // vlastní zápis se vrátil zpět — jen aktualizovat indikátor
+          render();
+        }
+      } else {
+        // první spuštění: založit dokument s aktuálními daty
+        FB.setDoc(fbDocRef, { reps: state.reps, weeks: state.weeks, settings: state.settings });
+      }
+    }, (err) => {
+      console.error('Firestore chyba:', err);
+      state.cloudOk = false;
+      render();
+      addToast('Spojení s databází selhalo — změny se ukládají jen lokálně.', 'error');
+    });
+  }catch(e){
+    console.error('Přihlášení k databázi selhalo:', e);
+    state.cloudOk = false;
+    addToast('Nepodařilo se připojit k databázi — lokální režim.', 'error');
+  }
 }
 
 async function persist(silent){
-  const ok1 = await storageSet(STORAGE_KEY_REPS, JSON.stringify(state.reps));
-  const ok2 = await storageSet(STORAGE_KEY_WEEKS, JSON.stringify(state.weeks));
-  const ok3 = await storageSet(STORAGE_KEY_SETTINGS, JSON.stringify(state.settings));
-  state.cloudOk = ok1 && ok2 && ok3;
-  if(state.cloudOk){
-    if(!silent) addToast('Změny byly uloženy pro celý tým.');
-  } else {
-    if(!silent) addToast('Uložení se nezdařilo. Zkuste to znovu.', 'error');
+  localBackupSave(); // záloha vždy
+  if(FB && fbDocRef){
+    try{
+      lastLocalWrite = Date.now();
+      await FB.setDoc(fbDocRef, { reps: state.reps, weeks: state.weeks, settings: state.settings });
+      state.cloudOk = true;
+      if(!silent) addToast('Uloženo do sdílené databáze — všichni teď vidí aktuální data.');
+      return;
+    }catch(e){
+      console.error('Zápis do Firestore selhal:', e);
+      state.cloudOk = false;
+      if(!silent) addToast('Zápis do databáze selhal — data jsou zatím jen lokálně. Zkuste to znovu.', 'error');
+      return;
+    }
   }
+  state.cloudOk = false;
+  if(!silent) addToast('Databáze nedostupná — uloženo pouze lokálně v tomto prohlížeči.', 'error');
 }
 
 /* ============ HELPERS ============ */
@@ -321,7 +405,7 @@ function headerHTML(){
         </div>
         <span class="text-xs font-bold px-3 py-2.5 rounded-2xl flex items-center gap-2 border shadow-sm ${state.cloudOk?'bg-emerald-50 text-emerald-800 border-emerald-100':'bg-amber-50 text-amber-800 border-amber-100'}">
           <span class="w-2.5 h-2.5 rounded-full ${state.cloudOk?'bg-emerald-500 animate-pulse':'bg-amber-500'}"></span>
-          <span class="hidden sm:inline">${state.cloudOk?'Uloženo v cloudu':'Lokální režim'}</span>
+          <span class="hidden sm:inline">${state.cloudOk?'Databáze online':'Lokální režim'}</span>
         </span>
       </div>
     </div>
