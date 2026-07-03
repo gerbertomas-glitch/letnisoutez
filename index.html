@@ -160,6 +160,7 @@ function applyRemoteData(data){
   if(Array.isArray(data.reps)) state.reps = data.reps;
   if(Array.isArray(data.weeks)) state.weeks = data.weeks;
   if(data.settings) state.settings = Object.assign(defaultSettings(), data.settings);
+  state.reps.forEach(ensureDeals);
   if(!state.selectedRepId || !repById(state.selectedRepId)){
     state.selectedRepId = state.reps[0] ? state.reps[0].id : null;
   }
@@ -180,6 +181,7 @@ async function loadData(){
   state.weeks = defaultWeeks();
   state.settings = defaultSettings();
   localBackupLoad();
+  state.reps.forEach(ensureDeals);
   state.selectedRepId = state.reps[0] ? state.reps[0].id : null;
   state.loading = false;
 
@@ -266,7 +268,32 @@ function tierInfo(turnover, stribro, zlato){
 }
 
 function monthData(rep, month){
-  return rep[month] || {turnover:0,newClients:0,stribro:100000,zlato:200000};
+  return rep[month] || {turnover:0,newClients:0,stribro:100000,zlato:200000,deals:[]};
+}
+
+/* ============ DEALY: historie částek + automatické sčítání ============ */
+// Každý deal: { id, amount, clients, ts (čas zadání), note }
+// Obrat měsíce = součet všech dealů. Starší data (jen souhrnný obrat) se
+// automaticky převedou na jeden úvodní deal "Počáteční stav".
+function ensureDeals(rep){
+  ['july','august'].forEach(month => {
+    if(!rep[month]) rep[month] = {turnover:0,newClients:0,stribro:100000,zlato:200000,deals:[]};
+    const d = rep[month];
+    if(!Array.isArray(d.deals)){
+      d.deals = (Number(d.turnover)||0) !== 0
+        ? [{ id:'init-'+month, amount:Number(d.turnover)||0, clients:0, ts:null, note:'Počáteční stav' }]
+        : [];
+    }
+    recomputeMonth(rep, month);
+  });
+}
+function recomputeMonth(rep, month){
+  const d = rep[month];
+  d.turnover = (d.deals||[]).reduce((sum, deal)=> sum + (Number(deal.amount)||0), 0);
+}
+function dealTimeText(ts){
+  if(!ts) return 'dříve';
+  return new Date(ts).toLocaleString('cs-CZ', { day:'numeric', month:'numeric', hour:'2-digit', minute:'2-digit' });
 }
 
 function repById(id){ return state.reps.find(r=>r.id===id); }
@@ -967,13 +994,44 @@ function adminModalHTML(){
 
 function monthColumnHTML(rep, month, label, emoji){
   const d = monthData(rep, month);
+  const deals = d.deals || [];
   return `
   <div class="space-y-3 ${month==='july'?'bg-orange-50/10 border-orange-100/50':'bg-slate-50/70 border-slate-200/50'} p-4 rounded-2xl border">
     <h4 class="text-xs font-black ${month==='july'?'text-orange-600':'text-blue-600'} uppercase tracking-wider">${emoji} ${label}</h4>
-    <div>
-      <label class="text-[10px] font-bold text-slate-400 block mb-1">Dosažený obrat (${rep.currency})</label>
-      <input type="number" data-rep="${rep.id}" data-month="${month}" data-field="turnover" value="${d.turnover}" class="w-full p-2 border border-slate-200 rounded-xl text-xs font-bold shadow-inner">
+
+    <!-- AUTOMATICKY SEČTENÝ OBRAT -->
+    <div class="bg-white rounded-xl border border-slate-200 p-3 shadow-inner">
+      <span class="text-[10px] font-bold text-slate-400 block">Celkový obrat (sčítá se automaticky z dealů)</span>
+      <p class="text-lg font-black text-orange-600 mt-0.5" data-month-total="${rep.id}-${month}">${formatMoney(d.turnover, rep.currency)}</p>
     </div>
+
+    <!-- RYCHLÉ PŘIDÁNÍ DEALU -->
+    <div>
+      <label class="text-[10px] font-bold text-slate-400 block mb-1">➕ Přidat deal</label>
+      <div class="flex gap-2">
+        <input type="number" data-deal-amount="${rep.id}-${month}" placeholder="Částka (${rep.currency})" class="flex-1 min-w-0 p-2 border border-slate-200 rounded-xl text-xs font-bold shadow-inner">
+        <input type="number" data-deal-clients="${rep.id}-${month}" placeholder="Klienti" title="Kolik nových klientů deal přinesl (nepovinné)" class="w-16 p-2 border border-slate-200 rounded-xl text-xs font-bold shadow-inner text-center">
+        <button data-action="add-deal" data-rep="${rep.id}" data-month="${month}" class="bg-orange-500 hover:bg-orange-600 text-white font-black px-3.5 rounded-xl text-sm shadow-sm shrink-0">+</button>
+      </div>
+      <p class="text-[9px] text-slate-400 font-semibold mt-1">Tip: zápornou částkou opravíte chybu. Enter = přidat.</p>
+    </div>
+
+    <!-- HISTORIE DEALŮ -->
+    <details class="bg-white rounded-xl border border-slate-200" ${deals.length && deals.length <= 6 ? 'open' : ''}>
+      <summary class="text-[10px] font-black text-slate-500 uppercase tracking-wider cursor-pointer select-none p-2.5">📜 Historie dealů (${deals.length})</summary>
+      <div class="max-h-40 overflow-y-auto px-2.5 pb-2.5 space-y-1.5">
+        ${deals.length === 0 ? '<p class="text-[10px] text-slate-400 font-semibold pb-1">Zatím žádné dealy.</p>' :
+          [...deals].reverse().map(deal => `
+          <div class="flex items-center justify-between gap-2 bg-slate-50 border border-slate-100 rounded-lg px-2.5 py-1.5">
+            <div class="min-w-0">
+              <span class="text-[11px] font-black ${(Number(deal.amount)||0) < 0 ? 'text-red-600' : 'text-slate-800'} block">${(Number(deal.amount)||0) >= 0 ? '+' : ''}${formatMoney(deal.amount, rep.currency)}</span>
+              <span class="text-[9px] text-slate-400 font-bold">${deal.note ? escapeHtml(deal.note) : dealTimeText(deal.ts)}${(Number(deal.clients)||0) > 0 ? ' · +' + deal.clients + ' klient' + (deal.clients >= 5 ? 'ů' : deal.clients > 1 ? 'i' : '') : ''}</span>
+            </div>
+            <button data-action="del-deal" data-rep="${rep.id}" data-month="${month}" data-deal="${deal.id}" class="text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg px-1.5 py-0.5 text-xs font-black shrink-0" title="Smazat deal">✕</button>
+          </div>`).join('')}
+      </div>
+    </details>
+
     <div>
       <label class="text-[10px] font-bold text-slate-400 block mb-1">Získaní klienti (celkem za měsíc)</label>
       <input type="number" data-rep="${rep.id}" data-month="${month}" data-field="newClients" value="${d.newClients}" class="w-full p-2 border border-slate-200 rounded-xl text-xs font-bold shadow-inner">
@@ -1139,10 +1197,46 @@ function bindGlobalEvents(){
         }
       };
       state.reps.push(newRep);
+      ensureDeals(newRep);
       state.selectedRepId = id;
       await persist(true);
       render();
       addToast(`Obchodník ${name} byl přidán do boosteru.`);
+    }
+    else if(action==='add-deal'){
+      const rep = repById(el.dataset.rep);
+      const month = el.dataset.month;
+      if(!rep) return;
+      const amountInput = document.querySelector(`[data-deal-amount="${rep.id}-${month}"]`);
+      const clientsInput = document.querySelector(`[data-deal-clients="${rep.id}-${month}"]`);
+      const amount = Number(amountInput ? amountInput.value : 0);
+      const clients = Math.max(Number(clientsInput ? clientsInput.value : 0) || 0, 0);
+      if(!amount){ addToast('Zadejte částku dealu.', 'error'); return; }
+      ensureDeals(rep);
+      const d = rep[month];
+      d.deals.push({ id: 'deal-' + Date.now() + '-' + Math.random().toString(36).slice(2,6), amount, clients, ts: Date.now(), note: '' });
+      recomputeMonth(rep, month);
+      if(clients > 0) d.newClients = (Number(d.newClients)||0) + clients;
+      refreshAdminRepCard(rep.id);
+      await persist(true);
+      addToast(`Deal ${amount >= 0 ? '+' : ''}${formatMoney(amount, rep.currency)} přidán a uložen. Nový obrat: ${formatMoney(d.turnover, rep.currency)}.`);
+    }
+    else if(action==='del-deal'){
+      const rep = repById(el.dataset.rep);
+      const month = el.dataset.month;
+      if(!rep) return;
+      ensureDeals(rep);
+      const d = rep[month];
+      const idx = d.deals.findIndex(x => x.id === el.dataset.deal);
+      if(idx === -1) return;
+      const deal = d.deals[idx];
+      if(!confirm(`Smazat deal ${formatMoney(deal.amount, rep.currency)}${deal.clients ? ' (+' + deal.clients + ' klientů)' : ''}?`)) return;
+      d.deals.splice(idx, 1);
+      recomputeMonth(rep, month);
+      if((Number(deal.clients)||0) > 0) d.newClients = Math.max((Number(d.newClients)||0) - deal.clients, 0);
+      refreshAdminRepCard(rep.id);
+      await persist(true);
+      addToast('Deal smazán, obrat přepočítán a uložen.', 'error');
     }
     else if(action==='reset-open'){ state.showResetConfirm = true; render(); }
     else if(action==='reset-cancel'){ state.showResetConfirm = false; render(); }
@@ -1150,6 +1244,7 @@ function bindGlobalEvents(){
       state.reps = defaultReps();
       state.weeks = defaultWeeks();
       state.settings = defaultSettings();
+      state.reps.forEach(ensureDeals);
       state.selectedRepId = state.reps[0].id;
       state.showResetConfirm = false;
       await persist(true);
@@ -1219,6 +1314,30 @@ function uniqueId(name){
   while(repById(id)){ id = base + '-' + (++n); }
   return id;
 }
+
+// Překreslí jen jednu kartu obchodníka v administraci (zachová scroll i ostatní rozepsaná pole)
+function refreshAdminRepCard(repId){
+  const rep = repById(repId);
+  const card = document.querySelector(`[data-rep-card="${repId}"]`);
+  if(rep && card){
+    const tmp = document.createElement('div');
+    tmp.innerHTML = repAdminCardHTML(rep);
+    card.replaceWith(tmp.firstElementChild);
+  }
+}
+
+// Enter v poli částky dealu = rovnou přidat
+document.addEventListener('keydown', (e) => {
+  if(e.key !== 'Enter') return;
+  const t = e.target;
+  if(t.dataset && (t.dataset.dealAmount || t.dataset.dealClients)){
+    e.preventDefault();
+    const key = t.dataset.dealAmount || t.dataset.dealClients;
+    const [repId, month] = [key.slice(0, key.lastIndexOf('-')), key.slice(key.lastIndexOf('-')+1)];
+    const btn = document.querySelector(`[data-action="add-deal"][data-rep="${repId}"][data-month="${month}"]`);
+    if(btn) btn.click();
+  }
+});
 
 function handleSliderInput(value){
   const rep = repById(state.selectedRepId);
