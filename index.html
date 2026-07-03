@@ -95,15 +95,36 @@ function addToast(message, type){
   setTimeout(()=>{ state.toasts = state.toasts.filter(t=>t.id!==id); renderToasts(); }, 3500);
 }
 
-/* ============ STORAGE ============ */
+/* ============ STORAGE (cloud + lokální záloha) ============ */
+async function storageGet(key){
+  try{
+    if(window.storage){
+      const r = await window.storage.get(key, true);
+      if(r && r.value) return r.value;
+    }
+  }catch(e){ /* klíč neexistuje nebo cloud nedostupný */ }
+  try{ return localStorage.getItem(key); }catch(e){ return null; }
+}
+async function storageSet(key, val){
+  let ok = false;
+  try{
+    if(window.storage){
+      const r = await window.storage.set(key, val, true);
+      if(r) ok = true;
+    }
+  }catch(e){ /* cloud selhal, zkusíme lokální zálohu */ }
+  try{ localStorage.setItem(key, val); ok = true; }catch(e){}
+  return ok;
+}
+
 async function loadData(){
   try{
-    const r = await window.storage.get(STORAGE_KEY_REPS, true);
-    state.reps = r ? JSON.parse(r.value) : defaultReps();
+    const r = await storageGet(STORAGE_KEY_REPS);
+    state.reps = r ? JSON.parse(r) : defaultReps();
   }catch(e){ state.reps = defaultReps(); }
   try{
-    const w = await window.storage.get(STORAGE_KEY_WEEKS, true);
-    state.weeks = w ? JSON.parse(w.value) : defaultWeeks();
+    const w = await storageGet(STORAGE_KEY_WEEKS);
+    state.weeks = w ? JSON.parse(w) : defaultWeeks();
   }catch(e){ state.weeks = defaultWeeks(); }
 
   if(!state.reps.length){ state.reps = defaultReps(); }
@@ -111,21 +132,18 @@ async function loadData(){
   state.selectedRepId = state.reps[0] ? state.reps[0].id : null;
   state.loading = false;
 
-  try{
-    await window.storage.set(STORAGE_KEY_REPS, JSON.stringify(state.reps), true);
-    await window.storage.set(STORAGE_KEY_WEEKS, JSON.stringify(state.weeks), true);
-    state.cloudOk = true;
-  }catch(e){ state.cloudOk = false; }
+  const ok1 = await storageSet(STORAGE_KEY_REPS, JSON.stringify(state.reps));
+  const ok2 = await storageSet(STORAGE_KEY_WEEKS, JSON.stringify(state.weeks));
+  state.cloudOk = ok1 && ok2;
 }
 
 async function persist(silent){
-  try{
-    await window.storage.set(STORAGE_KEY_REPS, JSON.stringify(state.reps), true);
-    await window.storage.set(STORAGE_KEY_WEEKS, JSON.stringify(state.weeks), true);
-    state.cloudOk = true;
+  const ok1 = await storageSet(STORAGE_KEY_REPS, JSON.stringify(state.reps));
+  const ok2 = await storageSet(STORAGE_KEY_WEEKS, JSON.stringify(state.weeks));
+  state.cloudOk = ok1 && ok2;
+  if(ok1 && ok2){
     if(!silent) addToast('Změny byly uloženy pro celý tým.');
-  }catch(e){
-    state.cloudOk = false;
+  } else {
     if(!silent) addToast('Uložení se nezdařilo. Zkuste to znovu.', 'error');
   }
 }
@@ -750,16 +768,16 @@ function monthColumnHTML(rep, month, label, emoji){
       <input type="number" data-rep="${rep.id}" data-month="${month}" data-field="turnover" value="${d.turnover}" class="w-full p-2 border border-slate-200 rounded-xl text-xs font-bold shadow-inner">
     </div>
     <div>
-      <label class="text-[10px] font-bold text-slate-400 block mb-1">Noví klienti</label>
+      <label class="text-[10px] font-bold text-slate-400 block mb-1">Získaní klienti (celkem za měsíc)</label>
       <input type="number" data-rep="${rep.id}" data-month="${month}" data-field="newClients" value="${d.newClients}" class="w-full p-2 border border-slate-200 rounded-xl text-xs font-bold shadow-inner">
     </div>
-    <div class="grid grid-cols-2 gap-2">
-      <div>
-        <label class="text-[9px] font-bold text-slate-400 block mb-0.5">Hranice pro 25 % (stříbro)</label>
+    <div class="grid grid-cols-2 gap-2 items-end">
+      <div class="flex flex-col">
+        <label class="text-[10px] font-bold text-slate-400 mb-1 min-h-[26px] flex items-end leading-tight">Hranice pro 25 %<br>(stříbro)</label>
         <input type="number" data-rep="${rep.id}" data-month="${month}" data-field="stribro" value="${d.stribro}" class="w-full p-2 border border-slate-200 rounded-xl text-xs font-bold shadow-inner">
       </div>
-      <div>
-        <label class="text-[9px] font-bold text-slate-400 block mb-0.5">Hranice pro 30 % (zlato)</label>
+      <div class="flex flex-col">
+        <label class="text-[10px] font-bold text-slate-400 mb-1 min-h-[26px] flex items-end leading-tight">Hranice pro 30 %<br>(zlato)</label>
         <input type="number" data-rep="${rep.id}" data-month="${month}" data-field="zlato" value="${d.zlato}" class="w-full p-2 border border-slate-200 rounded-xl text-xs font-bold shadow-inner">
       </div>
     </div>
@@ -767,6 +785,7 @@ function monthColumnHTML(rep, month, label, emoji){
 }
 
 function repAdminCardHTML(rep){
+  const totalClients = (Number(monthData(rep,'july').newClients)||0) + (Number(monthData(rep,'august').newClients)||0);
   return `
   <div class="bg-white border border-slate-200 rounded-[28px] p-6 space-y-6 shadow-sm" data-rep-card="${rep.id}">
     <div class="flex flex-col sm:flex-row items-center gap-4 pb-4 border-b border-slate-100">
@@ -775,12 +794,13 @@ function repAdminCardHTML(rep){
         <input type="text" data-rep="${rep.id}" data-field="name" value="${escapeHtml(rep.name)}" class="w-full p-2.5 border border-slate-200 rounded-xl text-sm font-black bg-white shadow-inner" placeholder="Celé jméno obchodníka">
         <input type="text" data-rep="${rep.id}" data-field="avatar" value="${escapeHtml(rep.avatar)}" class="w-full p-2.5 border border-slate-200 rounded-xl text-[10px] text-slate-500 bg-white shadow-inner" placeholder="Odkaz na fotku (URL)">
       </div>
-      <div class="flex flex-col gap-1.5 shrink-0 w-full sm:w-auto">
+      <div class="flex flex-col gap-1.5 shrink-0 w-full sm:w-auto items-stretch">
         <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Měna</label>
         <select data-rep="${rep.id}" data-field="currency" class="p-2.5 border border-slate-200 rounded-xl text-xs font-black bg-white shadow-sm cursor-pointer">
           <option value="CZK" ${rep.currency==='CZK'?'selected':''}>Kč (CZK)</option>
           <option value="EUR" ${rep.currency==='EUR'?'selected':''}>€ (EUR)</option>
         </select>
+        <span id="total-clients-${rep.id}" class="text-[10px] font-black text-emerald-700 bg-emerald-50 border border-emerald-100 px-2.5 py-1.5 rounded-xl text-center whitespace-nowrap">🎯 Celkem za léto: ${totalClients} klientů</span>
       </div>
     </div>
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -952,6 +972,13 @@ function bindGlobalEvents(){
       const month = t.dataset.month, field = t.dataset.field;
       if(!rep[month]) rep[month] = {turnover:0,newClients:0,stribro:0,zlato:0};
       rep[month][field] = (field==='turnover'||field==='newClients'||field==='stribro'||field==='zlato') ? Number(t.value)||0 : t.value;
+      if(field==='newClients'){
+        const badge = document.getElementById('total-clients-' + rep.id);
+        if(badge){
+          const total = (Number(monthData(rep,'july').newClients)||0) + (Number(monthData(rep,'august').newClients)||0);
+          badge.textContent = '🎯 Celkem za léto: ' + total + ' klientů';
+        }
+      }
     } else if(t.dataset && t.dataset.rep && t.dataset.field && !t.dataset.month){
       const rep = repById(t.dataset.rep);
       if(!rep) return;
