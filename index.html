@@ -174,6 +174,32 @@ function monthData(rep, month){
 
 function repById(id){ return state.reps.find(r=>r.id===id); }
 
+/* ============ AVATARY: výchozí fotka + čištění vloženého odkazu ============ */
+const DEFAULT_AVATAR = 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=200';
+
+// Ořeže mezery/nové řádky z vloženého odkazu a převede odkazy na stránku
+// z běžných fotohostingů na přímý odkaz na obrázek.
+function cleanAvatarUrl(raw){
+  let u = (raw || '').trim();
+  if(!u) return '';
+  // Google Drive sdílený odkaz -> přímý náhled
+  let m = u.match(/drive\.google\.com\/file\/d\/([^\/]+)/);
+  if(m) return 'https://drive.google.com/uc?export=view&id=' + m[1];
+  // Dropbox náhledová stránka -> přímý soubor
+  if(u.includes('dropbox.com')) return u.replace('?dl=0','?raw=1').replace('&dl=0','&raw=1');
+  // Imgur stránka obrázku -> přímý obrázek
+  m = u.match(/^https?:\/\/imgur\.com\/([A-Za-z0-9]+)$/);
+  if(m) return 'https://i.imgur.com/' + m[1] + '.png';
+  return u;
+}
+
+function avatarSrc(rep){
+  return escapeHtml(cleanAvatarUrl(rep && rep.avatar) || DEFAULT_AVATAR);
+}
+
+// vloží se do <img>, aby se při nefunkčním odkazu ukázala výchozí fotka místo prázdna
+const AVATAR_FALLBACK = `onerror="this.onerror=null;this.src='${DEFAULT_AVATAR}'"`;
+
 /* ============ ŽIVÉ HODINY + AUTOMATICKÉ PŘEPNUTÍ NA SRPEN ============ */
 function clockText(){
   const now = new Date();
@@ -313,7 +339,7 @@ function statsHTML(){
     <div class="bg-white border border-slate-100 p-8 rounded-[32px] flex flex-col sm:flex-row sm:items-center justify-between gap-6 premium-shadow col-span-1 md:col-span-6">
       <div class="flex items-center gap-5">
         <div class="flex -space-x-3 overflow-hidden shrink-0">
-          ${state.reps.slice(0,4).map(r=>`<img class="inline-block h-14 w-14 rounded-full ring-4 ring-white object-cover shadow-lg" src="${r.avatar}" alt="${escapeHtml(r.name)}">`).join('')}
+          ${state.reps.slice(0,4).map(r=>`<img class="inline-block h-14 w-14 rounded-full ring-4 ring-white object-cover shadow-lg" src="${avatarSrc(r)}" ${AVATAR_FALLBACK} alt="${escapeHtml(r.name)}">`).join('')}
         </div>
         <div>
           <span class="text-sm font-extrabold text-slate-400 uppercase tracking-wider block">Celkový obrat celého týmu</span>
@@ -327,7 +353,7 @@ function statsHTML(){
     </div>
 
     <div class="bg-white border border-slate-100 p-6 rounded-[32px] flex items-center gap-5 premium-shadow col-span-1 md:col-span-3">
-      ${s.topCommRep ? `<img data-action="select-rep" data-id="${s.topCommRep.id}" src="${s.topCommRep.avatar}" class="w-14 h-14 rounded-full object-cover ring-4 ring-amber-400/40 shadow-md cursor-pointer shrink-0" alt="${escapeHtml(s.topCommRep.name)}">` : `<div class="w-14 h-14 rounded-full bg-amber-100 flex items-center justify-center shrink-0">👑</div>`}
+      ${s.topCommRep ? `<img data-action="select-rep" data-id="${s.topCommRep.id}" src="${avatarSrc(s.topCommRep)}" ${AVATAR_FALLBACK} class="w-14 h-14 rounded-full object-cover ring-4 ring-amber-400/40 shadow-md cursor-pointer shrink-0" alt="${escapeHtml(s.topCommRep.name)}">` : `<div class="w-14 h-14 rounded-full bg-amber-100 flex items-center justify-center shrink-0">👑</div>`}
       <div>
         <span class="text-xs font-extrabold text-slate-400 uppercase tracking-wider block">Nejvyšší provize</span>
         <h3 class="text-base font-black text-slate-900 mt-0.5 truncate max-w-[220px]">${s.topCommRep ? escapeHtml(s.topCommRep.name) : '--'}</h3>
@@ -336,7 +362,7 @@ function statsHTML(){
     </div>
 
     <div class="bg-white border border-slate-100 p-6 rounded-[32px] flex items-center gap-5 premium-shadow col-span-1 md:col-span-3">
-      ${s.topHunterRep ? `<img data-action="select-rep" data-id="${s.topHunterRep.id}" src="${s.topHunterRep.avatar}" class="w-14 h-14 rounded-full object-cover ring-4 ring-emerald-400/40 shadow-md cursor-pointer shrink-0" alt="${escapeHtml(s.topHunterRep.name)}">` : `<div class="w-14 h-14 rounded-full bg-emerald-100 flex items-center justify-center shrink-0">🎯</div>`}
+      ${s.topHunterRep ? `<img data-action="select-rep" data-id="${s.topHunterRep.id}" src="${avatarSrc(s.topHunterRep)}" ${AVATAR_FALLBACK} class="w-14 h-14 rounded-full object-cover ring-4 ring-emerald-400/40 shadow-md cursor-pointer shrink-0" alt="${escapeHtml(s.topHunterRep.name)}">` : `<div class="w-14 h-14 rounded-full bg-emerald-100 flex items-center justify-center shrink-0">🎯</div>`}
       <div>
         <span class="text-xs font-extrabold text-slate-400 uppercase tracking-wider block">Nejaktivnější lovec</span>
         <h3 class="text-base font-black text-slate-900 mt-0.5 truncate max-w-[220px]">${s.topHunterRep ? escapeHtml(s.topHunterRep.name) : '--'}</h3>
@@ -365,7 +391,7 @@ function podiumHTML(){
         return `
         <div data-action="select-rep" data-id="${p.rep.id}" class="rounded-[28px] p-6 flex flex-col sm:flex-row items-center gap-5 cursor-pointer hover:scale-[1.02] transition-transform ${rankStyles}">
           <div class="relative shrink-0">
-            <img src="${p.rep.avatar}" alt="${escapeHtml(p.rep.name)}" class="w-16 h-16 rounded-full object-cover ring-4 ring-white shadow-md">
+            <img src="${avatarSrc(p.rep)}" ${AVATAR_FALLBACK} alt="${escapeHtml(p.rep.name)}" class="w-16 h-16 rounded-full object-cover ring-4 ring-white shadow-md">
             <span class="absolute -top-2 -right-2 w-8 h-8 rounded-full flex items-center justify-center font-black text-sm shadow-md border border-white/60 ${crown}">${p.rank}</span>
           </div>
           <div class="text-center sm:text-left flex-1 space-y-1.5">
@@ -414,7 +440,7 @@ function repsListHTML(){
         <div data-action="select-rep" data-id="${rep.id}" class="p-4 rounded-2xl border-2 cursor-pointer flex items-center justify-between gap-4 transition-all hover:bg-slate-50/50 ${isSelected?'border-orange-500/40 bg-orange-50/20':'border-slate-100'}">
           <div class="flex items-center gap-4">
             <div class="relative shrink-0">
-              <img src="${rep.avatar}" alt="${escapeHtml(rep.name)}" class="w-14 h-14 rounded-full object-cover shadow-md ${t.ring}">
+              <img src="${avatarSrc(rep)}" ${AVATAR_FALLBACK} alt="${escapeHtml(rep.name)}" class="w-14 h-14 rounded-full object-cover shadow-md ${t.ring}">
               <span class="absolute -bottom-1 -right-1 min-w-[32px] h-5 px-1.5 rounded-full border border-white flex items-center justify-center text-[9px] font-black shadow-md ${t.tier==='zlato'?'bg-yellow-400 text-slate-900':t.tier==='stribro'?'bg-slate-300 text-slate-900':'bg-slate-400 text-white'}">${t.rate}%</span>
             </div>
             <div>
@@ -490,7 +516,7 @@ function detailHTML(){
   <div class="space-y-8">
     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-5 pb-5 border-b border-slate-100">
       <div class="flex items-center gap-4">
-        <img src="${rep.avatar}" alt="${escapeHtml(rep.name)}" class="w-16 h-16 rounded-full object-cover ring-4 ring-slate-100 shadow-sm">
+        <img src="${avatarSrc(rep)}" ${AVATAR_FALLBACK} alt="${escapeHtml(rep.name)}" class="w-16 h-16 rounded-full object-cover ring-4 ring-slate-100 shadow-sm">
         <div>
           <h3 class="text-2xl font-black text-slate-900 leading-tight">${escapeHtml(rep.name)}</h3>
           <span class="inline-block text-[11px] px-3.5 py-1 rounded-full font-black border mt-1.5 shadow-sm ${t.badge}">${t.label}</span>
@@ -637,7 +663,7 @@ function weeksHTML(){
           return `
           <div class="bg-slate-50/80 border border-slate-100 rounded-3xl p-5 flex items-center justify-between gap-4 shadow-sm">
             <div class="flex items-center gap-3.5">
-              <img src="${winner.avatar}" alt="${escapeHtml(winner.name)}" class="w-12 h-12 rounded-full object-cover border-2 border-white shadow-sm">
+              <img src="${avatarSrc(winner)}" ${AVATAR_FALLBACK} alt="${escapeHtml(winner.name)}" class="w-12 h-12 rounded-full object-cover border-2 border-white shadow-sm">
               <div>
                 <span class="text-[10px] text-slate-400 font-extrabold uppercase block tracking-wider">${w.week}. týden (${w.dateRange})</span>
                 <h4 class="font-extrabold text-sm text-slate-900 mt-0.5">${escapeHtml(winner.name)}</h4>
@@ -655,7 +681,7 @@ function weeksHTML(){
           return `
           <div class="bg-orange-50/30 border border-orange-100 rounded-3xl p-5 flex items-center justify-between gap-4 shadow-sm">
             <div class="flex items-center gap-3.5">
-              <img src="${leader.avatar}" alt="${escapeHtml(leader.name)}" class="w-12 h-12 rounded-full object-cover border-2 border-white shadow-sm">
+              <img src="${avatarSrc(leader)}" ${AVATAR_FALLBACK} alt="${escapeHtml(leader.name)}" class="w-12 h-12 rounded-full object-cover border-2 border-white shadow-sm">
               <div>
                 <span class="text-[10px] text-orange-600 font-extrabold uppercase block tracking-wider">${w.week}. týden (${w.dateRange})</span>
                 <h4 class="font-extrabold text-sm text-slate-900 mt-0.5">${escapeHtml(leader.name)}</h4>
@@ -789,7 +815,7 @@ function repAdminCardHTML(rep){
   return `
   <div class="bg-white border border-slate-200 rounded-[28px] p-6 space-y-6 shadow-sm" data-rep-card="${rep.id}">
     <div class="flex flex-col sm:flex-row items-center gap-4 pb-4 border-b border-slate-100">
-      <img src="${rep.avatar}" class="w-16 h-16 rounded-full object-cover ring-4 ring-slate-100 shadow-sm shrink-0" onerror="this.src='https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=200'">
+      <img src="${avatarSrc(rep)}" data-avatar-preview="${rep.id}" class="w-16 h-16 rounded-full object-cover ring-4 ring-slate-100 shadow-sm shrink-0" ${AVATAR_FALLBACK}>
       <div class="flex-1 space-y-2 w-full">
         <input type="text" data-rep="${rep.id}" data-field="name" value="${escapeHtml(rep.name)}" class="w-full p-2.5 border border-slate-200 rounded-xl text-sm font-black bg-white shadow-inner" placeholder="Celé jméno obchodníka">
         <input type="text" data-rep="${rep.id}" data-field="avatar" value="${escapeHtml(rep.avatar)}" class="w-full p-2.5 border border-slate-200 rounded-xl text-[10px] text-slate-500 bg-white shadow-inner" placeholder="Odkaz na fotku (URL)">
@@ -913,7 +939,7 @@ function bindGlobalEvents(){
     else if(action==='add-rep'){
       const name = document.getElementById('new-rep-name').value.trim();
       if(!name){ addToast('Zadejte prosím jméno obchodníka.', 'error'); return; }
-      const avatar = document.getElementById('new-rep-avatar').value.trim() || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=200';
+      const avatar = cleanAvatarUrl(document.getElementById('new-rep-avatar').value) || DEFAULT_AVATAR;
       const currency = document.getElementById('new-rep-currency').value;
       const id = uniqueId(name);
       const newRep = {
@@ -982,7 +1008,17 @@ function bindGlobalEvents(){
     } else if(t.dataset && t.dataset.rep && t.dataset.field && !t.dataset.month){
       const rep = repById(t.dataset.rep);
       if(!rep) return;
-      rep[t.dataset.field] = t.value;
+      if(t.dataset.field === 'avatar'){
+        rep.avatar = cleanAvatarUrl(t.value);
+        // živý náhled fotky přímo v kartě administrace
+        const preview = document.querySelector(`[data-avatar-preview="${rep.id}"]`);
+        if(preview){
+          preview.onerror = function(){ this.onerror = null; this.src = DEFAULT_AVATAR; };
+          preview.src = rep.avatar || DEFAULT_AVATAR;
+        }
+      } else {
+        rep[t.dataset.field] = t.value;
+      }
     } else if(t.dataset && t.dataset.week && t.dataset.field){
       const w = state.weeks.find(w=>w.week==t.dataset.week);
       if(!w) return;
