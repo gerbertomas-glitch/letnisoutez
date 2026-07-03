@@ -156,6 +156,30 @@ function monthData(rep, month){
 
 function repById(id){ return state.reps.find(r=>r.id===id); }
 
+/* ============ ŽIVÉ HODINY + AUTOMATICKÉ PŘEPNUTÍ NA SRPEN ============ */
+function clockText(){
+  const now = new Date();
+  const date = now.toLocaleDateString('cs-CZ', { weekday:'short', day:'numeric', month:'numeric', year:'numeric' });
+  const time = now.toLocaleTimeString('cs-CZ', { hour:'2-digit', minute:'2-digit', second:'2-digit' });
+  return `${date} · ${time}`;
+}
+
+let userPickedMonth = false; // pokud uživatel ručně přepne měsíc, auto-přepínání ho nepřebije
+
+setInterval(()=>{
+  // tikající hodiny bez překreslení celé stránky
+  const el = document.getElementById('live-clock');
+  if(el) el.textContent = '🕒 ' + clockText();
+
+  // jakmile nastane srpen (nebo později), přepni dashboard primárně na srpen
+  const monthNow = new Date().getMonth(); // 7 = srpen
+  const shouldBe = monthNow >= 7 ? 'august' : 'july';
+  if(!userPickedMonth && state.activeMonth !== shouldBe){
+    state.activeMonth = shouldBe;
+    render();
+  }
+}, 1000);
+
 /* ============ RENDER: ROOT ============ */
 function render(){
   const app = document.getElementById('app');
@@ -224,20 +248,12 @@ function headerHTML(){
             </div>
           </div>
         </div>
-        <div class="flex items-center gap-3 bg-white/90 border border-orange-100 px-4 py-2.5 rounded-full shadow-sm">
-          <span class="text-xs font-black text-slate-500 uppercase tracking-wider hidden md:inline">Tým v akci:</span>
-          <div class="flex -space-x-3 overflow-hidden">
-            ${reps.map(rep=>{
-              const d = monthData(rep, state.activeMonth);
-              const t = tierInfo(d.turnover, d.stribro, d.zlato);
-              const ring = t.tier==='zlato'?'ring-yellow-400':t.tier==='stribro'?'ring-slate-300':'ring-slate-200';
-              return `<img data-action="select-rep" data-id="${rep.id}" class="inline-block h-10 w-10 rounded-full ring-2 object-cover hover:scale-110 transition-all cursor-pointer shadow-md ${rep.id===state.selectedRepId?'ring-orange-500 z-10 scale-105':ring}" src="${rep.avatar}" alt="${escapeHtml(rep.name)}" title="${escapeHtml(rep.name)}">`;
-            }).join('')}
-          </div>
-          <span class="text-xs font-black text-orange-600 bg-orange-50 px-2 py-1 rounded-lg border border-orange-100">${reps.length} prodejců</span>
-        </div>
       </div>
       <div class="flex flex-wrap items-center justify-center lg:justify-end gap-4 w-full lg:w-auto">
+        <div class="hidden sm:flex flex-col items-end">
+          <span class="text-xs font-bold text-slate-400">Aktuální datum a čas</span>
+          <span id="live-clock" class="text-sm font-black text-slate-700 bg-slate-50 px-3 py-1 rounded-xl border border-slate-150 tabular-nums">🕒 ${clockText()}</span>
+        </div>
         <div class="hidden sm:flex flex-col items-end">
           <span class="text-xs font-bold text-slate-400">Trvání soutěže</span>
           <span class="text-sm font-black text-slate-700 bg-slate-50 px-3 py-1 rounded-xl border border-slate-150">1. 7. – 31. 8. 2026</span>
@@ -292,32 +308,21 @@ function statsHTML(){
       </div>
     </div>
 
-    <div class="bg-white border border-slate-100 p-6 rounded-[32px] flex items-center gap-5 premium-shadow col-span-1 md:col-span-2">
+    <div class="bg-white border border-slate-100 p-6 rounded-[32px] flex items-center gap-5 premium-shadow col-span-1 md:col-span-3">
       ${s.topCommRep ? `<img data-action="select-rep" data-id="${s.topCommRep.id}" src="${s.topCommRep.avatar}" class="w-14 h-14 rounded-full object-cover ring-4 ring-amber-400/40 shadow-md cursor-pointer shrink-0" alt="${escapeHtml(s.topCommRep.name)}">` : `<div class="w-14 h-14 rounded-full bg-amber-100 flex items-center justify-center shrink-0">👑</div>`}
       <div>
         <span class="text-xs font-extrabold text-slate-400 uppercase tracking-wider block">Nejvyšší provize</span>
-        <h3 class="text-base font-black text-slate-900 mt-0.5 truncate max-w-[150px]">${s.topCommRep ? escapeHtml(s.topCommRep.name) : '--'}</h3>
+        <h3 class="text-base font-black text-slate-900 mt-0.5 truncate max-w-[220px]">${s.topCommRep ? escapeHtml(s.topCommRep.name) : '--'}</h3>
         <span class="text-xs text-amber-600 font-black block mt-0.5">${s.topCommRep ? formatMoney(s.topCommRep.amountNative, s.topCommRep.currency) : '--'}</span>
       </div>
     </div>
 
-    <div class="bg-white border border-slate-100 p-6 rounded-[32px] flex items-center gap-5 premium-shadow col-span-1 md:col-span-2">
+    <div class="bg-white border border-slate-100 p-6 rounded-[32px] flex items-center gap-5 premium-shadow col-span-1 md:col-span-3">
       ${s.topHunterRep ? `<img data-action="select-rep" data-id="${s.topHunterRep.id}" src="${s.topHunterRep.avatar}" class="w-14 h-14 rounded-full object-cover ring-4 ring-emerald-400/40 shadow-md cursor-pointer shrink-0" alt="${escapeHtml(s.topHunterRep.name)}">` : `<div class="w-14 h-14 rounded-full bg-emerald-100 flex items-center justify-center shrink-0">🎯</div>`}
       <div>
         <span class="text-xs font-extrabold text-slate-400 uppercase tracking-wider block">Nejaktivnější lovec</span>
-        <h3 class="text-base font-black text-slate-900 mt-0.5 truncate max-w-[150px]">${s.topHunterRep ? escapeHtml(s.topHunterRep.name) : '--'}</h3>
+        <h3 class="text-base font-black text-slate-900 mt-0.5 truncate max-w-[220px]">${s.topHunterRep ? escapeHtml(s.topHunterRep.name) : '--'}</h3>
         <span class="text-xs text-emerald-600 font-black block mt-0.5">${s.topHunterVal>0 ? s.topHunterVal+' akvizic' : '0 akvizic'}</span>
-      </div>
-    </div>
-
-    <div class="bg-white border border-slate-100 p-6 rounded-[32px] flex items-center gap-5 premium-shadow col-span-1 md:col-span-2">
-      <div class="flex -space-x-3 overflow-hidden shrink-0">
-        ${state.reps.slice(1,4).map(r=>`<img class="inline-block h-12 w-12 rounded-full ring-2 ring-white object-cover shadow-md" src="${r.avatar}" alt="${escapeHtml(r.name)}">`).join('')}
-      </div>
-      <div>
-        <span class="text-xs font-extrabold text-slate-400 uppercase tracking-wider block">Průměrná provize</span>
-        <h3 class="text-xl font-black text-slate-900 mt-0.5">${s.avgComm} %</h3>
-        <span class="text-xs text-purple-600 font-extrabold block mt-0.5">Základ: 20 %</span>
       </div>
     </div>
   </div>`;
@@ -346,10 +351,7 @@ function podiumHTML(){
             <span class="absolute -top-2 -right-2 w-8 h-8 rounded-full flex items-center justify-center font-black text-sm shadow-md border border-white/60 ${crown}">${p.rank}</span>
           </div>
           <div class="text-center sm:text-left flex-1 space-y-1.5">
-            <h4 class="font-extrabold text-base text-slate-900 flex items-center justify-center sm:justify-start gap-1">
-              <span>${escapeHtml(p.rep.name)}</span>
-              <span class="text-[9px] px-2 py-0.5 bg-white border border-slate-200 rounded-md uppercase font-black text-slate-500">${p.rep.currency}</span>
-            </h4>
+            <h4 class="font-extrabold text-base text-slate-900 text-center sm:text-left">${escapeHtml(p.rep.name)}</h4>
             <p class="text-base font-black text-orange-600">${formatMoney(d.turnover, p.rep.currency)}</p>
             <span class="inline-block text-xs font-black px-3 py-1 rounded-full bg-white/80 border border-slate-100 text-slate-600">Sazba: ${t.rate}%</span>
           </div>
@@ -494,10 +496,10 @@ function detailHTML(){
         <p class="text-lg font-extrabold text-emerald-600 mt-1">${d.newClients} nově</p>
         <span class="text-xs font-semibold text-slate-400">Aktuální měsíc</span>
       </div>
-      <div class="bg-slate-50/80 rounded-[22px] p-5 border border-slate-100 shadow-inner col-span-2 md:col-span-1">
-        <span class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider block">Sazba provize</span>
-        <p class="text-lg font-black text-orange-600 mt-1">${t.rate} %</p>
-        <span class="text-xs font-semibold text-slate-400">Ze všech obratu</span>
+      <div class="bg-gradient-to-br from-orange-50 to-yellow-50/60 rounded-[22px] p-5 border border-orange-200 shadow-inner col-span-2 md:col-span-1">
+        <span class="text-[10px] font-extrabold text-orange-500 uppercase tracking-wider block">Moje provize teď</span>
+        <p class="text-lg font-black text-orange-600 mt-1">${formatMoney(payout, rep.currency)}</p>
+        <span class="text-xs font-bold text-slate-500">${t.rate} % z celého obratu</span>
       </div>
     </div>
 
@@ -526,22 +528,12 @@ function detailHTML(){
       </div>
     </div>
 
-    <!-- POROVNÁNÍ PÁSEM A PŘEDBĚŽNÉ PROVIZE -->
-    <div class="space-y-4 pt-2">
-      <span class="text-xs font-extrabold text-slate-400 uppercase tracking-wider block">Kolik vydělám na jednotlivých pásmech:</span>
-      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        ${tierCompareCard('Základ', 20, t.tier==='zaklad', true, payout, rep.currency, 'Vaše aktuální sazba, dokud nedosáhnete stříbra.')}
-        ${tierCompareCard('Stříbro', 25, t.tier==='stribro', stribroDone, stribroPayout, rep.currency, stribroDone ? 'Dosaženo! Provize se počítá z celého obratu.' : `Cíl: ${formatMoney(d.stribro, rep.currency)} obratu`)}
-        ${tierCompareCard('Zlato', 30, t.tier==='zlato', zlatoDone, zlatoPayout, rep.currency, zlatoDone ? 'Dosaženo! Nejvyšší možná sazba.' : `Cíl: ${formatMoney(d.zlato, rep.currency)} obratu`)}
-      </div>
-    </div>
-
-    <!-- MILNÍKY -->
+    <!-- MILNÍKY S JASNOU PROVIZÍ -->
     <div class="space-y-4 pt-2">
       <span class="text-xs font-extrabold text-slate-400 uppercase tracking-wider block">Plnění letních milníků:</span>
       <div class="space-y-4">
-        ${milestoneCard('Stříbrné pásmo (25 % provize)', d.stribro, rep.currency, stribroDone, true, stribroProgress, stribroMissing)}
-        ${milestoneCard('Zlaté pásmo (30 % provize)', d.zlato, rep.currency, zlatoDone, stribroDone, zlatoProgress, zlatoMissing)}
+        ${milestoneCard('Stříbrné pásmo · 25 % provize', d.stribro, rep.currency, stribroDone, true, stribroProgress, stribroMissing, stribroPayout, payout, t.tier==='stribro')}
+        ${milestoneCard('Zlaté pásmo · 30 % provize', d.zlato, rep.currency, zlatoDone, stribroDone, zlatoProgress, zlatoMissing, zlatoPayout, payout, t.tier==='zlato')}
       </div>
     </div>
 
@@ -570,17 +562,6 @@ function detailHTML(){
   </div>`;
 }
 
-function tierCompareCard(label, rate, isCurrent, achieved, payout, currency, sub){
-  return `
-  <div class="rounded-[22px] p-5 border shadow-sm relative ${isCurrent ? 'bg-orange-50/60 border-orange-300 ring-4 ring-orange-500/10' : achieved ? 'bg-emerald-50/40 border-emerald-100' : 'bg-slate-50 border-slate-100'}">
-    ${isCurrent ? `<span class="absolute -top-3 left-4 bg-orange-500 text-white text-[9px] font-black px-2.5 py-1 rounded-full shadow-sm uppercase">Teď</span>` : ''}
-    ${(!isCurrent && achieved) ? `<span class="absolute -top-3 left-4 bg-emerald-500 text-white text-[9px] font-black px-2.5 py-1 rounded-full shadow-sm uppercase">Splněno</span>` : ''}
-    <span class="text-xs font-black text-slate-500 uppercase tracking-wider block mt-1">${label} · ${rate} %</span>
-    <p class="text-xl font-black text-slate-900 mt-1">${formatMoney(payout, currency)}</p>
-    <p class="text-[11px] text-slate-400 font-semibold mt-1 leading-snug">${sub}</p>
-  </div>`;
-}
-
 function milestoneMarker(pct, done, label, valueText){
   return `
   <div class="absolute top-0 bottom-0 flex flex-col items-center justify-center pointer-events-none" style="left:${pct}%">
@@ -593,18 +574,22 @@ function milestoneMarker(pct, done, label, valueText){
   </div>`;
 }
 
-function milestoneCard(title, target, currency, done, unlocked, progress, missing){
+function milestoneCard(title, target, currency, done, unlocked, progress, missing, tierPayout, currentPayout, isCurrent){
+  // tierPayout = provize garantovaná při dosažení hranice pásma (v měně obchodníka)
+  const extra = Math.max(tierPayout - currentPayout, 0);
   return `
   <div class="p-5 rounded-[22px] border transition-all shadow-sm ${done ? 'bg-emerald-50/40 border-emerald-100 text-emerald-800' : unlocked ? 'bg-orange-50/50 border-orange-200 ring-4 ring-orange-500/5 text-orange-950 active-milestone' : 'bg-slate-50 border-slate-100 text-slate-400 opacity-60'}">
-    <div class="flex justify-between items-center gap-4">
+    <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
       <div class="flex items-center gap-4">
-        <div class="w-10 h-10 rounded-full flex items-center justify-center ${done ? 'bg-emerald-100 text-emerald-600' : 'bg-orange-100 text-orange-600'}">🎯</div>
+        <div class="w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${done ? 'bg-emerald-100 text-emerald-600' : 'bg-orange-100 text-orange-600'}">🎯</div>
         <div>
-          <span class="text-[10px] font-black uppercase tracking-wider">${title}</span>
-          <h5 class="text-sm font-black text-slate-800 mt-1">Cíl: ${formatMoney(target, currency)}</h5>
+          <span class="text-[10px] font-black uppercase tracking-wider">${title}${isCurrent ? ' · <span class="text-orange-600">VAŠE AKTUÁLNÍ PÁSMO</span>' : ''}</span>
+          <h5 class="text-sm font-black text-slate-800 mt-1">Cíl obratu: ${formatMoney(target, currency)}</h5>
+          ${!done && unlocked ? `<p class="text-[11px] font-bold text-slate-500 mt-1">Při dosažení bude provize min. <strong class="text-slate-800">${formatMoney(tierPayout, currency)}</strong>${extra > 0 ? ` <span class="text-emerald-600">(+${formatMoney(extra, currency)} oproti teď)</span>` : ''}</p>` : ''}
+          ${done ? `<p class="text-[11px] font-bold text-emerald-700 mt-1">Pásmo splněno — provize se počítá sazbou z celého obratu.</p>` : ''}
         </div>
       </div>
-      <span class="text-xs font-extrabold bg-white border border-slate-200 px-3 py-1 rounded-xl shadow-sm whitespace-nowrap">
+      <span class="text-xs font-extrabold bg-white border border-slate-200 px-3 py-1 rounded-xl shadow-sm whitespace-nowrap self-start sm:self-center">
         ${done ? 'Splněno! 🎉' : (!unlocked ? 'Uzamčeno' : `Chybí ${formatMoney(missing, currency)}`)}
       </span>
     </div>
@@ -891,7 +876,7 @@ function bindGlobalEvents(){
     else if(action==='close-pin'){ state.showPinModal=false; render(); }
     else if(action==='dismiss-toast'){ state.toasts = state.toasts.filter(t=>t.id!==el.dataset.id); renderToasts(); }
     else if(action==='select-rep'){ state.selectedRepId = el.dataset.id; render(); }
-    else if(action==='set-month'){ state.activeMonth = el.dataset.month; render(); }
+    else if(action==='set-month'){ state.activeMonth = el.dataset.month; userPickedMonth = true; render(); }
     else if(action==='reset-sim'){ delete state.simTurnovers[state.selectedRepId]; render(); }
     else if(action==='admin-close'){ await persist(true); state.isAdmin=false; state.showResetConfirm=false; render(); addToast('Administrace uzavřena, změny uloženy.'); }
     else if(action==='admin-save'){ await persist(false); }
