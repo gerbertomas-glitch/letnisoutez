@@ -688,7 +688,8 @@ function detailHTML(){
   const stribroPct = (d.stribro/thermoScale)*100;
   const zlatoPct = (d.zlato/thermoScale)*100;
 
-  const sliderMax = Math.max(d.zlato * 1.4, 10000);
+  // Simulátor jede až do 1 000 000 Kč (u obchodníků v € ekvivalent 40 000 €)
+  const sliderMax = rep.currency === 'EUR' ? 40000 : 1000000;
   const sliderStep = rep.currency === 'EUR' ? 100 : 1000;
 
   // Motivační text: kolik chybí do dalšího pásma a o kolik si obchodník polepší
@@ -784,9 +785,16 @@ function detailHTML(){
       <div class="space-y-4">
         <div class="flex justify-between items-center text-sm font-bold text-slate-500">
           <span>Simulovat měsíční obrat</span>
-          <span id="sim-turnover-label" class="text-orange-600 font-black text-base">${formatMoney(turnover, rep.currency)}</span>
+          <span class="text-right">
+            <span id="sim-turnover-label" class="text-orange-600 font-black text-base block">${formatMoney(turnover, rep.currency)}</span>
+            <span id="sim-turnover-equiv" class="text-[11px] text-slate-400 font-bold">≈ ${formatSecondary(turnover, rep.currency)}</span>
+          </span>
         </div>
-        <input type="range" id="sim-slider" min="0" max="${sliderMax}" step="${sliderStep}" value="${turnover}" class="w-full accent-orange-500 cursor-pointer h-2 bg-slate-100 rounded-lg appearance-none shadow-inner">
+        <input type="range" id="sim-slider" min="0" max="${sliderMax}" step="${sliderStep}" value="${Math.min(turnover, sliderMax)}" class="w-full accent-orange-500 cursor-pointer h-2 bg-slate-100 rounded-lg appearance-none shadow-inner">
+        <div class="flex justify-between text-[10px] font-bold text-slate-400 -mt-2">
+          <span>0</span>
+          <span>${formatMoney(sliderMax, rep.currency)} (≈ ${formatSecondary(sliderMax, rep.currency)})</span>
+        </div>
         <div class="bg-slate-50 p-5 rounded-[22px] border border-slate-150/60 grid grid-cols-2 gap-5 text-sm shadow-inner">
           <div><span class="text-slate-400 block font-bold uppercase tracking-wider text-[10px]">Simulovaná sazba</span><strong id="sim-rate" class="text-xl text-slate-900 font-black">${t.rate}%</strong></div>
           <div><span class="text-slate-400 block font-bold uppercase tracking-wider text-[10px]">Simulovaná provize</span><strong id="sim-payout" class="text-xl text-orange-600 font-black">${formatMoney(payout, rep.currency)}</strong></div>
@@ -1349,6 +1357,8 @@ function handleSliderInput(value){
 
   const label = document.getElementById('sim-turnover-label');
   if(label) label.textContent = formatMoney(value, rep.currency);
+  const equiv = document.getElementById('sim-turnover-equiv');
+  if(equiv) equiv.textContent = '≈ ' + formatSecondary(value, rep.currency);
   const rateEl = document.getElementById('sim-rate');
   if(rateEl) rateEl.textContent = t.rate + '%';
   const payoutEl = document.getElementById('sim-payout');
